@@ -1,0 +1,33 @@
+.auth-page {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.auth-page__header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-page__header p {
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-form__error {
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+.auth-form__footer {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
