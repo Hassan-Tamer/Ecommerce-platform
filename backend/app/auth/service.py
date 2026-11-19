@@ -52,7 +52,7 @@ def register_user(
     email: str,
     password: str,
     confirm_password: str,
-) -> None:
+) -> LoginResponse:
     name = name.strip()
     email = email.strip().lower()
 
@@ -69,6 +69,9 @@ def register_user(
     user = User(name=name, email=email, password=hash_password(password))
     db.add(user)
     db.commit()
+    db.refresh(user)
+
+    return _issue_tokens(db, user)
 
 
 def login_user(db: Session, *, email: str, password: str) -> LoginResponse:
@@ -97,6 +100,10 @@ def refresh_user(db: Session, *, refresh_token: str) -> LoginResponse:
     revoke_refresh_token_row(db, row)
 
     return _issue_tokens(db, user)
+
+
+def get_me(user: User) -> UserOut:
+    return _user_out(user)
 
 
 def logout_user(db: Session, *, refresh_token: str) -> None:

@@ -4,3 +4,7 @@ from app.auth.router import router as auth_router
 
 app = FastAPI(title="E-commerce API")
 app.include_router(auth_router, tags=["auth"])
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
