@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import jwt as pyjwt
@@ -18,21 +19,27 @@ def refresh_token_expires_at() -> datetime:
 
 
 def create_access_token(*, user_id: int, email: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    issued_at = datetime.now(timezone.utc)
+    expire = issued_at + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": str(user_id),
         "email": email,
+        "iat": issued_at,
         "exp": expire,
+        "jti": uuid.uuid4().hex,
         "type": TokenType.ACCESS,
     }
     return pyjwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
 def create_refresh_token(*, user_id: int) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+    issued_at = datetime.now(timezone.utc)
+    expire = issued_at + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": str(user_id),
+        "iat": issued_at,
         "exp": expire,
+        "jti": uuid.uuid4().hex,
         "type": TokenType.REFRESH,
     }
     return pyjwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
