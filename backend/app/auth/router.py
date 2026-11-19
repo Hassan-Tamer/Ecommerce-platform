@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.auth import service
@@ -14,19 +14,30 @@ from app.auth.schemas import (
 )
 from app.db.deps import get_db
 from app.db.models import User
+from app.notifications.emails import send_register_hello_background
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=LoginResponse)
-def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    return service.register_user(
+def register(
+    request: RegisterRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    response = service.register_user(
         db,
         name=request.name,
         email=request.email,
         password=request.password,
         confirm_password=request.confirm_password,
     )
+    background_tasks.add_task(
+        send_register_hello_background,
+        to=response.user.email,
+        name=response.user.name,
+    )
+    return response
 
 
 @router.post("/login", response_model=LoginResponse)
