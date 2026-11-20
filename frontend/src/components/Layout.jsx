@@ -8,12 +8,18 @@ export default function Layout() {
 
   return (
     <div className="layout">
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
       <header className="layout__header">
         <div className="layout__inner">
           <Link className="layout__brand" to="/">
-            Store
+            Alimama
           </Link>
           <nav className="layout__nav" aria-label="Main">
+            <Link className="layout__link" to="/">
+              Shop
+            </Link>
             {isAuthenticated ? (
               <>
                 <span className="layout__user">
@@ -36,7 +42,7 @@ export default function Layout() {
           </nav>
         </div>
       </header>
-      <main className="layout__main">
+      <main id="main" className="layout__main">
         <Outlet />
       </main>
     </div>

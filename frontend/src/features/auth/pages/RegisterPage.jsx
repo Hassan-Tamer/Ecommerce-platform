@@ -7,7 +7,7 @@ export default function RegisterPage() {
     <div className="auth-page">
       <header className="auth-page__header">
         <h1>Create account</h1>
-        <p>Join us and start shopping.</p>
+        <p>Create an account to shop at Alimama.</p>
       </header>
       <RegisterForm />
       <p className="auth-form__footer">

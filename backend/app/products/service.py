@@ -8,14 +8,14 @@ from app.db.models import Category, Product
 from app.products.schemas import CategoryBrief, ProductImageOut, ProductOut, image_url_from_object_key
 
 
-def _product_to_out(product: Product) -> ProductOut:
+def _product_to_out(product: Product, *, include_stock: bool) -> ProductOut:
     return ProductOut(
         id=product.id,
         name=product.name,
         slug=product.slug,
         description=product.description,
         price=product.price,
-        stock_quantity=product.stock_quantity,
+        stock_quantity=product.stock_quantity if include_stock else None,
         is_active=product.is_active,
         category=product.category,
         images=[
@@ -44,6 +44,7 @@ def list_products(
     sort: str = "id",
     active_only: bool = True,
     is_active: bool | None = None,
+    include_stock: bool = False,
 ) -> list[ProductOut]:
     if min_price is not None and max_price is not None and min_price > max_price:
         raise HTTPException(status_code=400, detail="min_price must be <= max_price")
@@ -84,10 +85,16 @@ def list_products(
     stmt = stmt.order_by(order_by)
 
     products = db.scalars(stmt).all()
-    return [_product_to_out(p) for p in products]
+    return [_product_to_out(p, include_stock=include_stock) for p in products]
 
 
-def get_product_by_id(db: Session, *, product_id: int, active_only: bool = True) -> ProductOut:
+def get_product_by_id(
+    db: Session,
+    *,
+    product_id: int,
+    active_only: bool = True,
+    include_stock: bool = False,
+) -> ProductOut:
     stmt = (
         select(Product)
         .options(selectinload(Product.category), selectinload(Product.images))
@@ -98,10 +105,15 @@ def get_product_by_id(db: Session, *, product_id: int, active_only: bool = True)
     product = db.scalar(stmt)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-    return _product_to_out(product)
+    return _product_to_out(product, include_stock=include_stock)
 
 
-def get_product_by_slug(db: Session, *, slug: str) -> ProductOut:
+def get_product_by_slug(
+    db: Session,
+    *,
+    slug: str,
+    include_stock: bool = False,
+) -> ProductOut:
     product = db.scalar(
         select(Product)
         .options(selectinload(Product.category), selectinload(Product.images))
@@ -109,4 +121,4 @@ def get_product_by_slug(db: Session, *, slug: str) -> ProductOut:
     )
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-    return _product_to_out(product)
+    return _product_to_out(product, include_stock=include_stock)

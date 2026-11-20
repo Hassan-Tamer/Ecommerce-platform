@@ -16,6 +16,7 @@ export function AuthProvider({ children }) {
     try {
       const data = await authApi.register(credentials)
       if (data.token) authApi.setToken(data.token)
+      if (data.refresh_token) authApi.setRefreshToken(data.refresh_token)
       if (data.user) setUser(data.user)
       return data
     } catch (err) {
@@ -32,6 +33,7 @@ export function AuthProvider({ children }) {
     try {
       const data = await authApi.login(credentials)
       if (data.token) authApi.setToken(data.token)
+      if (data.refresh_token) authApi.setRefreshToken(data.refresh_token)
       if (data.user) setUser(data.user)
       return data
     } catch (err) {
@@ -42,10 +44,16 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const logout = useCallback(() => {
-    authApi.clearToken()
-    setUser(null)
-    setError(null)
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout()
+    } catch {
+      // The local session still ends if the server cannot revoke the refresh token.
+    } finally {
+      authApi.clearToken()
+      setUser(null)
+      setError(null)
+    }
   }, [])
 
   const value = useMemo(

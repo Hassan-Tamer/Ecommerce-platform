@@ -44,6 +44,7 @@ def admin_list_products(
         sort=sort,
         active_only=False,
         is_active=is_active,
+        include_stock=True,
     )
 
 
@@ -52,4 +53,9 @@ def admin_get_product(
     product_id: int,
     db: Session = Depends(get_db),
 ) -> ProductOut:
-    return service.get_product_by_id(db, product_id=product_id, active_only=False)
+    return service.get_product_by_id(
+        db,
+        product_id=product_id,
+        active_only=False,
+        include_stock=True,
+    )

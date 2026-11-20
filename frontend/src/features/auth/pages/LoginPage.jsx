@@ -7,7 +7,7 @@ export default function LoginPage() {
     <div className="auth-page">
       <header className="auth-page__header">
         <h1>Sign in</h1>
-        <p>Welcome back to the store.</p>
+        <p>Sign in to Alimama.</p>
       </header>
       <LoginForm />
       <p className="auth-form__footer">

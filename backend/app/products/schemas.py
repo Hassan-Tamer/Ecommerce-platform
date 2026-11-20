@@ -32,7 +32,7 @@ class ProductOut(BaseModel):
     slug: str
     description: str | None
     price: Decimal = Field(json_schema_extra={"type": "number"})
-    stock_quantity: int
+    stock_quantity: int | None = None
     is_active: bool
     category: CategoryBrief
     images: list[ProductImageOut]

@@ -17,7 +17,7 @@
 
 .btn--primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--counter-ink);
 }
 
 .btn--primary:hover:not(:disabled) {
@@ -31,5 +31,5 @@
 }
 
 .btn--ghost:hover:not(:disabled) {
-  background: #f9fafb;
+  background: var(--field);
 }

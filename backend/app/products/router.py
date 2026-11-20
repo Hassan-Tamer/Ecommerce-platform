@@ -4,16 +4,20 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from app.auth.dependencies import get_optional_current_user
 from app.db.deps import get_db
+from app.db.models import User
+from app.enums import UserRole
 from . import service
 from .schemas import CategoryBrief, ProductOut
 
 router = APIRouter(prefix="/products", tags=["products"])
 
 
-@router.get("", response_model=list[ProductOut])
+@router.get("", response_model=list[ProductOut], response_model_exclude_none=True)
 def list_products(
     db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_optional_current_user),
     category_slug: Annotated[str | None, Query(description="Filter by category slug")] = None,
     q: Annotated[
         str | None,
@@ -26,6 +30,9 @@ def list_products(
         Query(description="Sort order"),
     ] = "id",
 ) -> list[ProductOut]:
+    include_stock = (
+        current_user is not None and current_user.role == UserRole.ADMIN.value
+    )
     return service.list_products(
         db,
         category_slug=category_slug,
@@ -33,6 +40,7 @@ def list_products(
         min_price=min_price,
         max_price=max_price,
         sort=sort,
+        include_stock=include_stock,
     )
 
 

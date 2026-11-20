@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'auth_token'
+const REFRESH_TOKEN_KEY = 'refresh_token'
 
 function resolveBaseUrl() {
   const raw = import.meta.env.VITE_API_URL
@@ -22,8 +23,30 @@ export function setToken(token) {
   }
 }
 
+export function getRefreshToken() {
+  return localStorage.getItem(REFRESH_TOKEN_KEY)
+}
+
+export function setRefreshToken(token) {
+  if (token) {
+    localStorage.setItem(REFRESH_TOKEN_KEY, token)
+  } else {
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
+  }
+}
+
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(REFRESH_TOKEN_KEY)
+}
+
+export function logout() {
+  const refreshToken = getRefreshToken()
+  if (!refreshToken) return Promise.resolve(null)
+  return request('/auth/logout', {
+    method: 'POST',
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  })
 }
 
 async function request(path, options = {}) {

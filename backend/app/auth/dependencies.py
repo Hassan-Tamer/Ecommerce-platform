@@ -10,6 +10,7 @@ from app.db.deps import get_db
 from app.db.models import User
 
 _bearer = HTTPBearer()
+_bearer_optional = HTTPBearer(auto_error=False)
 
 
 def get_current_user(
@@ -27,6 +28,15 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
     return user
+
+
+def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_optional),
+    db: Session = Depends(get_db),
+) -> User | None:
+    if credentials is None:
+        return None
+    return get_current_user(credentials=credentials, db=db)
 
 
 def get_current_admin(
