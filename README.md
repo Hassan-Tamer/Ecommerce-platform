@@ -19,13 +19,20 @@ Review Summarizer [ ]
 Semantic search [ ]
 
 ## Admin Portal 
+Populate products [x]
 CRUD for products [ ]
-Pagination [ ]
+Pagination [ ] 
 MinIO [ ]
 Redis [ ]
 Dashboard [ ]
 
 ## Important commands
+
+Seed catalog (100 products):
+```
+egrobots
+cd backend && PYTHONPATH=. python scripts/seeding/seed_catalog.py --reset -n 100
+```
 
 SMTP server: 
 ```
