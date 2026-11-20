@@ -1,9 +1,9 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, Request, Response
 from sqlalchemy.orm import Session
 
-from app.auth import service
-from app.auth.dependencies import get_current_user
-from app.auth.schemas import (
+from . import service
+from .dependencies import get_current_user
+from .schemas import (
     LoginRequest,
     LoginResponse,
     LogoutRequest,

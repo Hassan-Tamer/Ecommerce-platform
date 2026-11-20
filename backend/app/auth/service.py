@@ -39,7 +39,7 @@ def _issue_tokens(db: Session, user: User) -> LoginResponse:
     db.commit()
 
     return LoginResponse(
-        token=create_access_token(user_id=user.id, email=user.email),
+        token=create_access_token(user_id=user.id, email=user.email, role=user.role),
         refresh_token=refresh_token,
         user=_user_out(user),
     )

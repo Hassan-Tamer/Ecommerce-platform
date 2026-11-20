@@ -42,15 +42,20 @@ def list_products(
     min_price: Decimal | None = None,
     max_price: Decimal | None = None,
     sort: str = "id",
+    active_only: bool = True,
+    is_active: bool | None = None,
 ) -> list[ProductOut]:
     if min_price is not None and max_price is not None and min_price > max_price:
         raise HTTPException(status_code=400, detail="min_price must be <= max_price")
 
-    stmt = (
-        select(Product)
-        .options(selectinload(Product.category), selectinload(Product.images))
-        .where(Product.is_active.is_(True))
+    stmt = select(Product).options(
+        selectinload(Product.category),
+        selectinload(Product.images),
     )
+    if active_only:
+        stmt = stmt.where(Product.is_active.is_(True))
+    elif is_active is not None:
+        stmt = stmt.where(Product.is_active.is_(is_active))
 
     if category_slug:
         slug = category_slug.strip()
@@ -82,12 +87,15 @@ def list_products(
     return [_product_to_out(p) for p in products]
 
 
-def get_product_by_id(db: Session, *, product_id: int) -> ProductOut:
-    product = db.scalar(
+def get_product_by_id(db: Session, *, product_id: int, active_only: bool = True) -> ProductOut:
+    stmt = (
         select(Product)
         .options(selectinload(Product.category), selectinload(Product.images))
-        .where(Product.id == product_id, Product.is_active.is_(True))
+        .where(Product.id == product_id)
     )
+    if active_only:
+        stmt = stmt.where(Product.is_active.is_(True))
+    product = db.scalar(stmt)
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
     return _product_to_out(product)

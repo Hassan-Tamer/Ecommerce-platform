@@ -5,6 +5,7 @@ from typing import Optional
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.auth.enums import UserRole
 from app.db.base import Base
 
 
@@ -15,6 +16,11 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True, nullable=False)
     password: Mapped[str] = mapped_column(String(512), nullable=False)
+    role: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        server_default=UserRole.CUSTOMER.value,
+    )
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         back_populates="user",
