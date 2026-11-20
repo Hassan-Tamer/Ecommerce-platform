@@ -25,16 +25,7 @@ class UserOut(BaseModel):
 
 class LoginResponse(BaseModel):
     token: str
-    refresh_token: str
     user: UserOut
-
-
-class RefreshRequest(BaseModel):
-    refresh_token: str
-
-
-class LogoutRequest(BaseModel):
-    refresh_token: str
 
 
 class LogoutResponse(BaseModel):

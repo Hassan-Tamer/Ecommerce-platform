@@ -1,58 +1,49 @@
-const TOKEN_KEY = 'auth_token'
-const REFRESH_TOKEN_KEY = 'refresh_token'
+let accessToken = null
 
-function resolveBaseUrl() {
-  const raw = import.meta.env.VITE_API_URL
-  if (raw === undefined || raw === '') {
-    throw new Error('Set VITE_API_URL in frontend/.env (see frontend/.env.example)')
-  }
-  return String(raw).trim().replace(/\/+$/, '').replace(/\/api$/, '')
+try {
+  localStorage.removeItem('auth_token')
+  localStorage.removeItem('refresh_token')
+} catch {
+  // Storage can be unavailable. Tokens are not kept there.
 }
 
-const baseUrl = resolveBaseUrl()
+export function getApiBase() {
+  const raw = import.meta.env.VITE_API_URL
+  if (raw === undefined || String(raw).trim() === '') return ''
+  const base = String(raw).trim().replace(/\/+$/, '').replace(/\/api$/, '')
+  if (typeof window !== 'undefined' && import.meta.env.DEV) {
+    try {
+      const api = new URL(base)
+      const localApi = api.hostname === 'localhost' || api.hostname === '127.0.0.1'
+      const devPage = window.location.port === '5173'
+      if (localApi && devPage && api.origin !== window.location.origin) return ''
+    } catch {
+      return base
+    }
+  }
+  return base
+}
+
+const baseUrl = getApiBase()
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY)
+  return accessToken
 }
 
 export function setToken(token) {
-  if (token) {
-    localStorage.setItem(TOKEN_KEY, token)
-  } else {
-    localStorage.removeItem(TOKEN_KEY)
-  }
-}
-
-export function getRefreshToken() {
-  return localStorage.getItem(REFRESH_TOKEN_KEY)
-}
-
-export function setRefreshToken(token) {
-  if (token) {
-    localStorage.setItem(REFRESH_TOKEN_KEY, token)
-  } else {
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
-  }
+  accessToken = token || null
 }
 
 export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(REFRESH_TOKEN_KEY)
-}
-
-export function logout() {
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) return Promise.resolve(null)
-  return request('/auth/logout', {
-    method: 'POST',
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  })
+  accessToken = null
 }
 
 async function request(path, options = {}) {
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers,
+  }
+  if (options.body) {
+    headers['Content-Type'] = 'application/json'
   }
 
   const token = getToken()
@@ -63,6 +54,7 @@ async function request(path, options = {}) {
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
     headers,
+    credentials: 'include',
   })
 
   const data = await response.json().catch(() => null)
@@ -71,7 +63,7 @@ async function request(path, options = {}) {
     const detail = data?.detail
     const message =
       (typeof detail === 'string' && detail) ||
-      (Array.isArray(detail) && detail.map((e) => e.msg).join(', ')) ||
+      (Array.isArray(detail) && detail.map((entry) => entry.msg).join(', ')) ||
       data?.message ||
       response.statusText ||
       'Request failed'
@@ -79,6 +71,17 @@ async function request(path, options = {}) {
   }
 
   return data
+}
+
+let refreshInFlight = null
+
+export function refresh() {
+  if (!refreshInFlight) {
+    refreshInFlight = request('/auth/refresh', { method: 'POST' }).finally(() => {
+      refreshInFlight = null
+    })
+  }
+  return refreshInFlight
 }
 
 export function register({ email, password, confirmPassword, name }) {
@@ -98,4 +101,8 @@ export function login({ email, password }) {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
+}
+
+export function logout() {
+  return request('/auth/logout', { method: 'POST' })
 }

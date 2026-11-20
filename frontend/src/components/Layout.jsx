@@ -4,7 +4,7 @@ import Button from './Button'
 import './Layout.css'
 
 export default function Layout() {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, ready, user, logout } = useAuth()
 
   return (
     <div className="layout">
@@ -20,7 +20,7 @@ export default function Layout() {
             <Link className="layout__link" to="/">
               Shop
             </Link>
-            {isAuthenticated ? (
+            {ready && isAuthenticated ? (
               <>
                 <span className="layout__user">
                   {user?.name ?? user?.email ?? 'Account'}
@@ -29,7 +29,7 @@ export default function Layout() {
                   Log out
                 </Button>
               </>
-            ) : (
+            ) : ready ? (
               <>
                 <Link className="layout__link" to="/login">
                   Sign in
@@ -38,7 +38,7 @@ export default function Layout() {
                   <Button type="button">Register</Button>
                 </Link>
               </>
-            )}
+            ) : null}
           </nav>
         </div>
       </header>

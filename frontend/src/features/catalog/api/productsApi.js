@@ -1,14 +1,6 @@
-import { getToken } from '../../auth/api/authApi'
+import { getApiBase, getToken } from '../../auth/api/authApi'
 
-function resolveBaseUrl() {
-  const raw = import.meta.env.VITE_API_URL
-  if (raw === undefined || raw === '') {
-    throw new Error('Set VITE_API_URL in frontend/.env (see frontend/.env.example)')
-  }
-  return String(raw).trim().replace(/\/+$/, '').replace(/\/api$/, '')
-}
-
-const baseUrl = resolveBaseUrl()
+const baseUrl = getApiBase()
 
 async function request(path, options = {}) {
   const headers = { ...options.headers }

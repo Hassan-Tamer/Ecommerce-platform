@@ -4,9 +4,7 @@ from app.enums import TokenType, UserRole
 from .schemas import (
     LoginRequest,
     LoginResponse,
-    LogoutRequest,
     LogoutResponse,
-    RefreshRequest,
     RegisterRequest,
     UserOut,
 )
@@ -17,9 +15,7 @@ from .router import router
 __all__ = [
     "LoginRequest",
     "LoginResponse",
-    "LogoutRequest",
     "LogoutResponse",
-    "RefreshRequest",
     "RegisterRequest",
     "TokenType",
     "UserOut",

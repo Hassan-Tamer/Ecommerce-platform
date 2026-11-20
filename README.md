@@ -21,8 +21,8 @@ Semantic search [ ]
 ## Admin Portal 
 Populate products [x]
 CRUD for products [ ]
-Pagination [ ] 
-MinIO [ ]
+Pagination [x] 
+MinIO [x]
 Redis [ ]
 Dashboard [ ]
 

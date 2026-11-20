@@ -33,16 +33,16 @@ def _user_out(user: User) -> UserOut:
     return UserOut(id=user.id, name=user.name, email=user.email)
 
 
-def _issue_tokens(db: Session, user: User) -> LoginResponse:
+def _issue_tokens(db: Session, user: User) -> tuple[LoginResponse, str]:
     refresh_token = create_refresh_token(user_id=user.id)
     store_refresh_token(db, user_id=user.id, token=refresh_token)
     db.commit()
 
-    return LoginResponse(
+    response = LoginResponse(
         token=create_access_token(user_id=user.id, email=user.email, role=user.role),
-        refresh_token=refresh_token,
         user=_user_out(user),
     )
+    return response, refresh_token
 
 
 def register_user(
@@ -52,7 +52,7 @@ def register_user(
     email: str,
     password: str,
     confirm_password: str,
-) -> LoginResponse:
+) -> tuple[LoginResponse, str]:
     name = name.strip()
     email = email.strip().lower()
 
@@ -79,7 +79,7 @@ def register_user(
     return _issue_tokens(db, user)
 
 
-def login_user(db: Session, *, email: str, password: str) -> LoginResponse:
+def login_user(db: Session, *, email: str, password: str) -> tuple[LoginResponse, str]:
     email = email.strip().lower()
     user = db.scalar(select(User).where(User.email == email))
 
@@ -89,7 +89,7 @@ def login_user(db: Session, *, email: str, password: str) -> LoginResponse:
     return _issue_tokens(db, user)
 
 
-def refresh_user(db: Session, *, refresh_token: str) -> LoginResponse:
+def refresh_user(db: Session, *, refresh_token: str) -> tuple[LoginResponse, str]:
     payload = decode_token(refresh_token, expected_type=TokenType.REFRESH)
 
     try:

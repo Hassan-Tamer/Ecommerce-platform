@@ -1,14 +1,13 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from . import service
+from .cookies import REFRESH_COOKIE, clear_refresh_cookie, set_refresh_cookie
 from .dependencies import get_current_user
 from .schemas import (
     LoginRequest,
     LoginResponse,
-    LogoutRequest,
     LogoutResponse,
-    RefreshRequest,
     RegisterRequest,
     UserOut,
 )
@@ -29,13 +28,14 @@ def register(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    login_response = service.register_user(
+    login_response, refresh_token = service.register_user(
         db,
         name=body.name,
         email=body.email,
         password=body.password,
         confirm_password=body.confirm_password,
     )
+    set_refresh_cookie(response, refresh_token)
     background_tasks.add_task(
         send_register_hello_background,
         to=login_response.user.email,
@@ -49,23 +49,36 @@ def register(
 def login(
     request: Request, response: Response, body: LoginRequest, db: Session = Depends(get_db)
 ):
-    return service.login_user(db, email=body.email, password=body.password)
+    login_response, refresh_token = service.login_user(db, email=body.email, password=body.password)
+    set_refresh_cookie(response, refresh_token)
+    return login_response
 
 
 @router.post("/refresh", response_model=LoginResponse)
 @limiter.limit("30/minute")
 def refresh(
-    request: Request, response: Response, body: RefreshRequest, db: Session = Depends(get_db)
+    request: Request, response: Response, db: Session = Depends(get_db)
 ):
-    return service.refresh_user(db, refresh_token=body.refresh_token)
+    refresh_token = request.cookies.get(REFRESH_COOKIE)
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    login_response, next_refresh_token = service.refresh_user(db, refresh_token=refresh_token)
+    set_refresh_cookie(response, next_refresh_token)
+    return login_response
 
 
 @router.post("/logout", response_model=LogoutResponse)
 @limiter.limit("30/minute")
 def logout(
-    request: Request, response: Response, body: LogoutRequest, db: Session = Depends(get_db)
+    request: Request, response: Response, db: Session = Depends(get_db)
 ):
-    service.logout_user(db, refresh_token=body.refresh_token)
+    refresh_token = request.cookies.get(REFRESH_COOKIE)
+    if refresh_token:
+        try:
+            service.logout_user(db, refresh_token=refresh_token)
+        except HTTPException:
+            pass
+    clear_refresh_cookie(response)
     return LogoutResponse(message="Logged out successfully")
 
 
