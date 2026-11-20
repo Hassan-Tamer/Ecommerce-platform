@@ -8,16 +8,17 @@ export default function RegisterForm() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [localError, setLocalError] = useState(null)
 
   async function handleSubmit(event) {
     event.preventDefault()
     setLocalError(null)
-    try {
-      await register({ name, email, password })
-    } catch {
-      setLocalError('Registration failed. Wire up the backend when ready.')
+    if (password !== confirmPassword) {
+      setLocalError('Passwords do not match.')
+      return
     }
+    await register({ name, email, password, confirmPassword })
   }
 
   const displayError = localError ?? error
@@ -56,6 +57,16 @@ export default function RegisterForm() {
         minLength={8}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+      />
+      <FormField
+        id="register-confirm-password"
+        label="Confirm password"
+        type="password"
+        autoComplete="new-password"
+        required
+        minLength={8}
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
       />
       <Button type="submit" disabled={loading}>
         {loading ? 'Creating account…' : 'Create account'}

@@ -12,11 +12,7 @@ export default function LoginForm() {
   async function handleSubmit(event) {
     event.preventDefault()
     setLocalError(null)
-    try {
-      await login({ email, password })
-    } catch {
-      setLocalError('Login failed. Wire up the backend when ready.')
-    }
+    await login({ email, password })
   }
 
   const displayError = localError ?? error

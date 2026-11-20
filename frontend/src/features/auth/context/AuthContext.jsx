@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import * as authApi from '../api/authApi'
-import { clearToken, getToken, setToken } from '../../../lib/storage'
 
 const AuthContext = createContext(null)
 
@@ -9,14 +8,14 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const isAuthenticated = Boolean(user ?? getToken())
+  const isAuthenticated = Boolean(user ?? authApi.getToken())
 
   const register = useCallback(async (credentials) => {
     setLoading(true)
     setError(null)
     try {
       const data = await authApi.register(credentials)
-      if (data.token) setToken(data.token)
+      if (data.token) authApi.setToken(data.token)
       if (data.user) setUser(data.user)
       return data
     } catch (err) {
@@ -32,7 +31,7 @@ export function AuthProvider({ children }) {
     setError(null)
     try {
       const data = await authApi.login(credentials)
-      if (data.token) setToken(data.token)
+      if (data.token) authApi.setToken(data.token)
       if (data.user) setUser(data.user)
       return data
     } catch (err) {
@@ -44,7 +43,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const logout = useCallback(() => {
-    clearToken()
+    authApi.clearToken()
     setUser(null)
     setError(null)
   }, [])

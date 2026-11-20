@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.enums import TokenType
+from app.enums import TokenType, UserRole
 from .jwt import create_access_token, create_refresh_token, decode_token
 from .refresh_tokens import (
     assert_refresh_token_active,
@@ -66,7 +66,12 @@ def register_user(
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
 
-    user = User(name=name, email=email, password=hash_password(password))
+    user = User(
+        name=name,
+        email=email,
+        password=hash_password(password),
+        role=UserRole.CUSTOMER.value,
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
