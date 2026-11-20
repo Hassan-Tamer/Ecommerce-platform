@@ -180,6 +180,12 @@
   color: var(--muted);
 }
 
+.catalog__more {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0 0.5rem;
+}
+
 .catalog__grid {
   list-style: none;
   margin: 1rem 0 0;

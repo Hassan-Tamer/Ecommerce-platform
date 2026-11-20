@@ -36,3 +36,8 @@ class ProductOut(BaseModel):
     is_active: bool
     category: CategoryBrief
     images: list[ProductImageOut]
+
+
+class ProductListPage(BaseModel):
+    items: list[ProductOut]
+    next_cursor: str | None = None

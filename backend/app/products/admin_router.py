@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from app.auth import get_current_admin
 from app.db.deps import get_db
 from . import service
-from .schemas import ProductOut
+from .pagination import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+from .schemas import ProductListPage, ProductOut
 
 router = APIRouter(
     prefix="/admin/products",
@@ -16,9 +17,17 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=list[ProductOut])
+@router.get("", response_model=ProductListPage)
 def admin_list_products(
     db: Session = Depends(get_db),
+    cursor: Annotated[
+        str | None,
+        Query(min_length=1, description="Opaque cursor from a previous page"),
+    ] = None,
+    limit: Annotated[
+        int,
+        Query(ge=1, le=MAX_PAGE_SIZE, description="Page size"),
+    ] = DEFAULT_PAGE_SIZE,
     category_slug: Annotated[str | None, Query(description="Filter by category slug")] = None,
     q: Annotated[
         str | None,
@@ -34,7 +43,7 @@ def admin_list_products(
         bool | None,
         Query(description="Filter by active flag; omit to include all"),
     ] = None,
-) -> list[ProductOut]:
+) -> ProductListPage:
     return service.list_products(
         db,
         category_slug=category_slug,
@@ -45,6 +54,8 @@ def admin_list_products(
         active_only=False,
         is_active=is_active,
         include_stock=True,
+        cursor=cursor,
+        limit=limit,
     )
 
 

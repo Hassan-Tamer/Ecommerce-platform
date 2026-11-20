@@ -9,15 +9,24 @@ from app.db.deps import get_db
 from app.db.models import User
 from app.enums import UserRole
 from . import service
-from .schemas import CategoryBrief, ProductOut
+from .pagination import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+from .schemas import CategoryBrief, ProductListPage, ProductOut
 
 router = APIRouter(prefix="/products", tags=["products"])
 
 
-@router.get("", response_model=list[ProductOut], response_model_exclude_none=True)
+@router.get("", response_model=ProductListPage, response_model_exclude_none=True)
 def list_products(
     db: Session = Depends(get_db),
     current_user: User | None = Depends(get_optional_current_user),
+    cursor: Annotated[
+        str | None,
+        Query(min_length=1, description="Opaque cursor from a previous page"),
+    ] = None,
+    limit: Annotated[
+        int,
+        Query(ge=1, le=MAX_PAGE_SIZE, description="Page size"),
+    ] = DEFAULT_PAGE_SIZE,
     category_slug: Annotated[str | None, Query(description="Filter by category slug")] = None,
     q: Annotated[
         str | None,
@@ -29,7 +38,7 @@ def list_products(
         Literal["id", "price_asc", "price_desc", "name"],
         Query(description="Sort order"),
     ] = "id",
-) -> list[ProductOut]:
+) -> ProductListPage:
     include_stock = (
         current_user is not None and current_user.role == UserRole.ADMIN.value
     )
@@ -41,6 +50,8 @@ def list_products(
         max_price=max_price,
         sort=sort,
         include_stock=include_stock,
+        cursor=cursor,
+        limit=limit,
     )
 
 

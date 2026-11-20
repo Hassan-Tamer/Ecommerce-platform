@@ -5,7 +5,21 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.db.models import Category, Product
-from app.products.schemas import CategoryBrief, ProductImageOut, ProductOut, image_url_from_object_key
+from app.products.pagination import (
+    DEFAULT_PAGE_SIZE,
+    MAX_PAGE_SIZE,
+    _decode_cursor,
+    apply_cursor_filter,
+    encode_next_cursor,
+    order_by_for_sort,
+)
+from app.products.schemas import (
+    CategoryBrief,
+    ProductImageOut,
+    ProductListPage,
+    ProductOut,
+    image_url_from_object_key,
+)
 
 
 def _product_to_out(product: Product, *, include_stock: bool) -> ProductOut:
@@ -45,9 +59,17 @@ def list_products(
     active_only: bool = True,
     is_active: bool | None = None,
     include_stock: bool = False,
-) -> list[ProductOut]:
+    cursor: str | None = None,
+    limit: int = DEFAULT_PAGE_SIZE,
+) -> ProductListPage:
     if min_price is not None and max_price is not None and min_price > max_price:
         raise HTTPException(status_code=400, detail="min_price must be <= max_price")
+
+    if limit < 1 or limit > MAX_PAGE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"limit must be between 1 and {MAX_PAGE_SIZE}",
+        )
 
     stmt = select(Product).options(
         selectinload(Product.category),
@@ -76,16 +98,21 @@ def list_products(
     if max_price is not None:
         stmt = stmt.where(Product.price <= max_price)
 
-    order_by = {
-        "id": Product.id.asc(),
-        "price_asc": Product.price.asc(),
-        "price_desc": Product.price.desc(),
-        "name": Product.name.asc(),
-    }.get(sort, Product.id.asc())
-    stmt = stmt.order_by(order_by)
+    if cursor:
+        decoded = _decode_cursor(cursor, expected_sort=sort)
+        stmt = apply_cursor_filter(stmt, sort=sort, cursor=decoded)
 
-    products = db.scalars(stmt).all()
-    return [_product_to_out(p, include_stock=include_stock) for p in products]
+    for clause in order_by_for_sort(sort):
+        stmt = stmt.order_by(clause)
+
+    rows = db.scalars(stmt.limit(limit + 1)).all()
+    has_more = len(rows) > limit
+    page = rows[:limit]
+
+    return ProductListPage(
+        items=[_product_to_out(p, include_stock=include_stock) for p in page],
+        next_cursor=encode_next_cursor(sort, page[-1]) if has_more else None,
+    )
 
 
 def get_product_by_id(

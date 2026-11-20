@@ -59,6 +59,8 @@ export function listProducts(filters = {}, { signal } = {}) {
   if (filters.min !== undefined && filters.min !== '') params.set('min_price', filters.min)
   if (filters.max !== undefined && filters.max !== '') params.set('max_price', filters.max)
   if (filters.sort && filters.sort !== 'id') params.set('sort', filters.sort)
+  if (filters.cursor) params.set('cursor', filters.cursor)
+  if (filters.limit != null) params.set('limit', String(filters.limit))
   const query = params.toString()
   return request(`/products${query ? `?${query}` : ''}`, { signal })
 }

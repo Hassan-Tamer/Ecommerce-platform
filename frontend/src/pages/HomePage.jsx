@@ -51,7 +51,9 @@ export default function HomePage() {
   const [categories, setCategories] = useState([])
   const [categoriesError, setCategoriesError] = useState(null)
   const [products, setProducts] = useState([])
+  const [nextCursor, setNextCursor] = useState(null)
   const [status, setStatus] = useState('loading')
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
 
@@ -128,18 +130,49 @@ export default function HomePage() {
       },
       { signal: controller.signal },
     )
-      .then((rows) => {
-        setProducts(rows)
+      .then((page) => {
+        setProducts(page.items)
+        setNextCursor(page.next_cursor ?? null)
         setStatus('ready')
       })
       .catch((err) => {
         if (err.name === 'AbortError') return
         setProducts([])
+        setNextCursor(null)
         setStatus('error')
         setError(err.message || 'The catalog did not load.')
       })
     return () => controller.abort()
   }, [queryKey, rangeError, reloadKey])
+
+  function loadMore() {
+    if (!nextCursor || loadingMore || status !== 'ready') return
+
+    const current = new URLSearchParams(queryKey)
+    const min = current.get('min') ?? ''
+    const max = current.get('max') ?? ''
+    const rawSort = current.get('sort') ?? 'id'
+    const activeSort = SORTS.some((option) => option.value === rawSort) ? rawSort : 'id'
+
+    setLoadingMore(true)
+    setError(null)
+    listProducts({
+      q: current.get('q') ?? '',
+      category: current.get('category') ?? '',
+      min,
+      max,
+      sort: activeSort,
+      cursor: nextCursor,
+    })
+      .then((page) => {
+        setProducts((prev) => [...prev, ...page.items])
+        setNextCursor(page.next_cursor ?? null)
+      })
+      .catch((err) => {
+        setError(err.message || 'Could not load more products.')
+      })
+      .finally(() => setLoadingMore(false))
+  }
 
   function updateParam(key, value) {
     setParams(
@@ -164,7 +197,7 @@ export default function HomePage() {
   )
 
   const resultLabel =
-    products.length === 1 ? '1 product' : `${products.length} products`
+    products.length === 1 ? '1 product shown' : `${products.length} products shown`
 
   return (
     <div className="catalog">
@@ -336,6 +369,18 @@ export default function HomePage() {
                 )
               })}
             </ul>
+            {nextCursor && (
+              <div className="catalog__more">
+                <button
+                  type="button"
+                  className="filters__clear"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? 'Loading more…' : 'Load more'}
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
