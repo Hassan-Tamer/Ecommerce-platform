@@ -17,18 +17,11 @@ export function AuthProvider({ children }) {
   const isAuthenticated = Boolean(user)
 
   useEffect(() => {
+    authApi.setSessionHandler(setUser)
     let cancelled = false
     authApi
       .refresh()
-      .then((data) => {
-        if (!cancelled) storeSession(data, setUser)
-      })
-      .catch(() => {
-        if (!cancelled) {
-          authApi.clearToken()
-          setUser(null)
-        }
-      })
+      .catch(() => {})
       .finally(() => {
         if (!cancelled) setReady(true)
       })

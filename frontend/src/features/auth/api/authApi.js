@@ -38,17 +38,84 @@ export function clearToken() {
   accessToken = null
 }
 
-async function request(path, options = {}) {
-  const headers = {
-    ...options.headers,
+const NO_REFRESH = new Set(['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'])
+
+let sessionHandler = null
+let refreshInFlight = null
+
+export function setSessionHandler(handler) {
+  sessionHandler = handler
+}
+
+function decodePayload(token) {
+  const part = token.split('.')[1]
+  if (!part) return null
+  const pad = part.length % 4 === 0 ? '' : '='.repeat(4 - (part.length % 4))
+  try {
+    return JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/') + pad))
+  } catch {
+    return null
   }
-  if (options.body) {
-    headers['Content-Type'] = 'application/json'
+}
+
+function isExpired(token) {
+  const payload = decodePayload(token)
+  if (!payload?.exp) return false
+  return payload.exp * 1000 <= Date.now() + 30_000
+}
+
+function errorFrom(response, data) {
+  const detail = data?.detail
+  const message =
+    (typeof detail === 'string' && detail) ||
+    (Array.isArray(detail) && detail.map((entry) => entry.msg).join(', ')) ||
+    data?.message ||
+    response.statusText ||
+    'Request failed'
+  const error = new Error(message)
+  error.status = response.status
+  return error
+}
+
+function failSession(error) {
+  clearToken()
+  sessionHandler?.(null)
+  throw error
+}
+
+export function refresh() {
+  if (!refreshInFlight) {
+    refreshInFlight = send('/auth/refresh', { method: 'POST' }, true)
+      .then((data) => {
+        if (data?.token) setToken(data.token)
+        else clearToken()
+        sessionHandler?.(data?.user ?? null)
+        return data
+      })
+      .catch((error) => failSession(error))
+      .finally(() => {
+        refreshInFlight = null
+      })
+  }
+  return refreshInFlight
+}
+
+async function send(path, options, retried) {
+  const pathname = path.split('?')[0]
+  const canRefresh = !retried && !NO_REFRESH.has(pathname)
+
+  if (canRefresh && accessToken && isExpired(accessToken)) {
+    try {
+      await refresh()
+    } catch {
+      // The session is already cleared. Continue this request without a token.
+    }
   }
 
-  const token = getToken()
-  if (token) {
-    headers.Authorization = `Bearer ${token}`
+  const headers = { ...options.headers }
+  if (options.body) headers['Content-Type'] = 'application/json'
+  if (accessToken && pathname !== '/auth/refresh') {
+    headers.Authorization = `Bearer ${accessToken}`
   }
 
   const response = await fetch(`${baseUrl}${path}`, {
@@ -56,36 +123,23 @@ async function request(path, options = {}) {
     headers,
     credentials: 'include',
   })
-
   const data = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    const detail = data?.detail
-    const message =
-      (typeof detail === 'string' && detail) ||
-      (Array.isArray(detail) && detail.map((entry) => entry.msg).join(', ')) ||
-      data?.message ||
-      response.statusText ||
-      'Request failed'
-    throw new Error(message)
+  if (response.status === 401 && canRefresh) {
+    await refresh()
+    return send(path, options, true)
   }
 
+  if (!response.ok) throw errorFrom(response, data)
   return data
 }
 
-let refreshInFlight = null
-
-export function refresh() {
-  if (!refreshInFlight) {
-    refreshInFlight = request('/auth/refresh', { method: 'POST' }).finally(() => {
-      refreshInFlight = null
-    })
-  }
-  return refreshInFlight
+export function apiRequest(path, options = {}) {
+  return send(path, options, false)
 }
 
 export function register({ email, password, confirmPassword, name }) {
-  return request('/auth/register', {
+  return apiRequest('/auth/register', {
     method: 'POST',
     body: JSON.stringify({
       email,
@@ -97,12 +151,12 @@ export function register({ email, password, confirmPassword, name }) {
 }
 
 export function login({ email, password }) {
-  return request('/auth/login', {
+  return apiRequest('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
 }
 
 export function logout() {
-  return request('/auth/logout', { method: 'POST' })
+  return apiRequest('/auth/logout', { method: 'POST' })
 }

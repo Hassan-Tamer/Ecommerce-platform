@@ -1,33 +1,7 @@
-import { getApiBase, getToken } from '../../auth/api/authApi'
+import { apiRequest } from '../../auth/api/authApi'
 
-const baseUrl = getApiBase()
-
-async function request(path, options = {}) {
-  const headers = { ...options.headers }
-  const token = getToken()
-  if (token) {
-    headers.Authorization = `Bearer ${token}`
-  }
-
-  const response = await fetch(`${baseUrl}${path}`, {
-    ...options,
-    headers,
-  })
-
-  const data = await response.json().catch(() => null)
-
-  if (!response.ok) {
-    const detail = data?.detail
-    const message =
-      (typeof detail === 'string' && detail) ||
-      (Array.isArray(detail) && detail.map((entry) => entry.msg).join(', ')) ||
-      data?.message ||
-      response.statusText ||
-      'Request failed'
-    throw new Error(message)
-  }
-
-  return data
+function request(path, options = {}) {
+  return apiRequest(path, options)
 }
 
 export function formatPrice(value) {
