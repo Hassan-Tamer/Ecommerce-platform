@@ -49,7 +49,7 @@ docker run -d --name redis \
   redis:7-alpine
 ```
 
-MinIO (API :9000, web console :9001 — create bucket `product-images` in the console or via `mc`)
+MinIO (S3 API on host :9001, console :9002 — create bucket `product-images`, then optional public read for dev)
 ```
 docker run -d --name minio \
     -p 9001:9000 -p 9002:9001 \

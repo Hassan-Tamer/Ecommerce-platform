@@ -4,6 +4,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.auth.router import router as auth_router
+from app.products.router import router as products_router
 from app.ratelimit import limiter
 
 
@@ -20,6 +21,7 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 app.include_router(auth_router, tags=["auth"])
+app.include_router(products_router)
 
 @app.get("/health")
 def health():
