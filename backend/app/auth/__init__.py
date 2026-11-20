@@ -1,7 +1,6 @@
-from . import service
-from .dependencies import get_current_admin, get_current_user
-from .enums import TokenType, UserRole
-from .router import router
+"""Public auth API — import from ``app.auth`` outside this package; use relative imports inside."""
+
+from app.enums import TokenType, UserRole
 from .schemas import (
     LoginRequest,
     LoginResponse,
@@ -11,6 +10,9 @@ from .schemas import (
     RegisterRequest,
     UserOut,
 )
+from .dependencies import get_current_admin, get_current_user
+from . import service
+from .router import router
 
 __all__ = [
     "LoginRequest",

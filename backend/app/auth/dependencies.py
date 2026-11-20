@@ -4,8 +4,8 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from app.auth.enums import TokenType, UserRole
-from app.auth.jwt import decode_token
+from app.enums import TokenType, UserRole
+from .jwt import decode_token
 from app.db.deps import get_db
 from app.db.models import User
 

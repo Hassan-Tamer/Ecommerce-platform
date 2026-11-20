@@ -4,14 +4,14 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth.enums import TokenType
-from app.auth.jwt import create_access_token, create_refresh_token, decode_token
-from app.auth.refresh_tokens import (
+from app.enums import TokenType
+from .jwt import create_access_token, create_refresh_token, decode_token
+from .refresh_tokens import (
     assert_refresh_token_active,
     revoke_refresh_token_row,
     store_refresh_token,
 )
-from app.auth.schemas import LoginResponse, UserOut
+from .schemas import LoginResponse, UserOut
 from app.db.models import User
 
 _password_hasher = PasswordHasher()

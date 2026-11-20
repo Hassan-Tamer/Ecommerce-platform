@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth.jwt import refresh_token_expires_at
+from .jwt import refresh_token_expires_at
 from app.db.models import RefreshToken
 
 

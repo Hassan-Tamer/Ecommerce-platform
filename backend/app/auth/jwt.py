@@ -6,7 +6,7 @@ import jwt as pyjwt
 from fastapi import HTTPException
 from jwt.exceptions import PyJWTError
 
-from app.auth.enums import TokenType
+from app.enums import TokenType
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-only-change-me")
 JWT_ALGORITHM = "HS256"
