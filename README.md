@@ -23,7 +23,7 @@ Populate products [x]
 CRUD for products [ ]
 Pagination [x] 
 MinIO [x]
-Redis [ ]
+Redis [x]
 Dashboard [ ]
 
 ## Important commands

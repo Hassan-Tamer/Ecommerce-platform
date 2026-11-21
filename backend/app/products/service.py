@@ -13,6 +13,7 @@ from app.products.pagination import (
     encode_next_cursor,
     order_by_for_sort,
 )
+from app.products.catalog_cache import get_product_by_slug_cached, set_product_by_slug_cached
 from app.products.schemas import (
     CategoryBrief,
     ProductImageOut,
@@ -41,6 +42,12 @@ def _product_to_out(product: Product, *, include_stock: bool) -> ProductOut:
             for image in product.images
         ],
     )
+
+
+def _product_out_for_view(product: ProductOut, *, include_stock: bool) -> ProductOut:
+    if include_stock:
+        return product
+    return product.model_copy(update={"stock_quantity": None})
 
 
 def list_categories(db: Session) -> list[CategoryBrief]:
@@ -141,11 +148,19 @@ def get_product_by_slug(
     slug: str,
     include_stock: bool = False,
 ) -> ProductOut:
+    normalized = slug.strip()
+    cached = get_product_by_slug_cached(normalized)
+    if cached is not None:
+        return _product_out_for_view(cached, include_stock=include_stock)
+
     product = db.scalar(
         select(Product)
         .options(selectinload(Product.category), selectinload(Product.images))
-        .where(Product.slug == slug, Product.is_active.is_(True))
+        .where(Product.slug == normalized, Product.is_active.is_(True))
     )
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
-    return _product_to_out(product, include_stock=include_stock)
+
+    stored = _product_to_out(product, include_stock=True)
+    set_product_by_slug_cached(product.slug, stored)
+    return _product_out_for_view(stored, include_stock=include_stock)

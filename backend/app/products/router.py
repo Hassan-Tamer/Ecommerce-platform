@@ -60,11 +60,18 @@ def list_categories(db: Session = Depends(get_db)) -> list[CategoryBrief]:
     return service.list_categories(db)
 
 
-@router.get("/slug/{slug}", response_model=ProductOut)
-def get_product_by_slug(slug: str, db: Session = Depends(get_db)) -> ProductOut:
-    return service.get_product_by_slug(db, slug=slug)
+@router.get("/slug/{slug}", response_model=ProductOut, response_model_exclude_none=True)
+def get_product_by_slug(
+    slug: str,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_optional_current_user),
+) -> ProductOut:
+    include_stock = (
+        current_user is not None and current_user.role == UserRole.ADMIN.value
+    )
+    return service.get_product_by_slug(db, slug=slug, include_stock=include_stock)
 
 
-@router.get("/{product_id}", response_model=ProductOut)
+@router.get("/{product_id:int}", response_model=ProductOut)
 def get_product(product_id: int, db: Session = Depends(get_db)) -> ProductOut:
     return service.get_product_by_id(db, product_id=product_id)
