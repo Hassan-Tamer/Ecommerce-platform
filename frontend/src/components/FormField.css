@@ -12,9 +12,10 @@
 }
 
 .form-field__input {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
+  padding: 0.7rem 0.85rem;
+  border: 1px solid transparent;
   border-radius: var(--radius);
+  background: var(--field);
   width: 100%;
 }
 

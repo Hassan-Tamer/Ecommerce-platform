@@ -1,11 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { clearAvatarPreview } from '../../account/avatarPreview'
 import * as authApi from '../api/authApi'
 
 const AuthContext = createContext(null)
 
-function storeSession(data, setUser) {
+function storeSession(data, acceptUser) {
   if (data?.token) authApi.setToken(data.token)
-  if (data?.user) setUser(data.user)
+  if (data?.user) acceptUser(data.user)
 }
 
 export function AuthProvider({ children }) {
@@ -16,8 +17,16 @@ export function AuthProvider({ children }) {
 
   const isAuthenticated = Boolean(user)
 
+  const acceptUser = useCallback((next) => {
+    if (!next) {
+      setUser(null)
+      return
+    }
+    setUser({ ...next, role: authApi.readRole() })
+  }, [])
+
   useEffect(() => {
-    authApi.setSessionHandler(setUser)
+    authApi.setSessionHandler(acceptUser)
     let cancelled = false
     authApi
       .refresh()
@@ -28,14 +37,15 @@ export function AuthProvider({ children }) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [acceptUser])
 
   const register = useCallback(async (credentials) => {
     setLoading(true)
     setError(null)
     try {
       const data = await authApi.register(credentials)
-      storeSession(data, setUser)
+      clearAvatarPreview()
+      storeSession(data, acceptUser)
       return data
     } catch (err) {
       setError(err.message)
@@ -43,14 +53,15 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [acceptUser])
 
   const login = useCallback(async (credentials) => {
     setLoading(true)
     setError(null)
     try {
       const data = await authApi.login(credentials)
-      storeSession(data, setUser)
+      clearAvatarPreview()
+      storeSession(data, acceptUser)
       return data
     } catch (err) {
       setError(err.message)
@@ -58,7 +69,7 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [acceptUser])
 
   const logout = useCallback(async () => {
     try {
@@ -67,6 +78,7 @@ export function AuthProvider({ children }) {
       // The local session still ends if the server cannot revoke the refresh token.
     } finally {
       authApi.clearToken()
+      clearAvatarPreview()
       setUser(null)
       setError(null)
     }

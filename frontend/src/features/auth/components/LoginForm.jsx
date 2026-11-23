@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Button from '../../../components/Button'
 import FormField from '../../../components/FormField'
 
 export default function LoginForm() {
   const { login, loading, error } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [localError, setLocalError] = useState(null)
@@ -12,7 +15,14 @@ export default function LoginForm() {
   async function handleSubmit(event) {
     event.preventDefault()
     setLocalError(null)
-    await login({ email, password })
+    const requested = location.state?.from
+    const next = typeof requested === 'string' && requested.startsWith('/') ? requested : '/account'
+    try {
+      await login({ email, password })
+      navigate(next, { replace: true })
+    } catch {
+      // The form shows the error from auth state.
+    }
   }
 
   const displayError = localError ?? error

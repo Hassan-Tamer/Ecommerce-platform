@@ -58,6 +58,11 @@ function decodePayload(token) {
   }
 }
 
+export function readRole() {
+  const payload = accessToken ? decodePayload(accessToken) : null
+  return typeof payload?.role === 'string' ? payload.role : null
+}
+
 function isExpired(token) {
   const payload = decodePayload(token)
   if (!payload?.exp) return false

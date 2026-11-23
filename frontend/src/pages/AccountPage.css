@@ -1,0 +1,122 @@
+.account__grid {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: stretch;
+  margin-top: 1.5rem;
+}
+
+.account__card {
+  padding: 1.35rem 1.4rem 1.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.account__card h2 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  margin-bottom: 1rem;
+}
+
+.account__address {
+  grid-column: 1 / -1;
+}
+
+.account__photo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.account__photo-card h2 {
+  align-self: flex-start;
+  text-align: left;
+}
+
+.account__form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+}
+
+.account__card:not(.account__photo-card) .account__form .btn {
+  align-self: flex-start;
+}
+
+.account__photo-card .account__form {
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.account__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.account__form .form-field,
+.account__form .desk__field {
+  width: 100%;
+}
+
+.account__email {
+  color: var(--muted);
+}
+
+.account__photo {
+  width: 9rem;
+  height: 9rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--field);
+  overflow: hidden;
+  color: var(--muted);
+}
+
+.account__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account__file {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--field);
+  color: var(--ink);
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+.account__file:hover {
+  background: var(--border);
+}
+
+.account__file input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+@media (max-width: 800px) {
+  .account__grid,
+  .account__fields {
+    grid-template-columns: 1fr;
+  }
+}

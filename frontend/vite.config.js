@@ -12,7 +12,15 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/auth': { target: apiTarget, changeOrigin: true },
-        '/admin': { target: apiTarget, changeOrigin: true },
+        '/admin': {
+          target: apiTarget,
+          changeOrigin: true,
+          bypass(req) {
+            if (req.headers?.accept?.includes('text/html')) {
+              return '/index.html'
+            }
+          },
+        },
         '/health': { target: apiTarget, changeOrigin: true },
         '/products/categories': { target: apiTarget, changeOrigin: true },
         '/products/slug': { target: apiTarget, changeOrigin: true },

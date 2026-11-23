@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Button from '../../../components/Button'
 import FormField from '../../../components/FormField'
 
 export default function RegisterForm() {
   const { register, loading, error } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,7 +21,14 @@ export default function RegisterForm() {
       setLocalError('Passwords do not match.')
       return
     }
-    await register({ name, email, password, confirmPassword })
+    const requested = location.state?.from
+    const next = typeof requested === 'string' && requested.startsWith('/') ? requested : '/account'
+    try {
+      await register({ name, email, password, confirmPassword })
+      navigate(next, { replace: true })
+    } catch {
+      // The form shows the error from auth state.
+    }
   }
 
   const displayError = localError ?? error

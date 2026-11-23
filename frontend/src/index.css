@@ -14,6 +14,9 @@
   --font-display: 'Bricolage Grotesque', Georgia, serif;
   --font-body: Figtree, 'Segoe UI', sans-serif;
   --max-width: 1120px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --shadow: 0 12px 32px rgba(18, 62, 56, 0.08);
 
   --text: var(--ink);
   --text-muted: var(--muted);
@@ -21,7 +24,6 @@
   --bg: var(--paper);
   --accent: var(--counter);
   --accent-hover: #0c2f2b;
-  --radius: 2px;
   --font: var(--font-body);
 
   font-family: var(--font);

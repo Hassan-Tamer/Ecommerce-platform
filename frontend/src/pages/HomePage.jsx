@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import AddToCartButton from '../components/AddToCartButton'
+import SaveButton from '../components/SaveButton'
+import Announcements from '../components/Announcements'
 import { formatPrice, listCategories, listProducts } from '../features/catalog/api/productsApi'
 import './HomePage.css'
 
@@ -228,6 +231,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <Announcements />
+
       <div className="catalog__body">
         <div className="filters">
           <div className="filters__categories" role="group" aria-label="Category">
@@ -364,6 +369,10 @@ export default function HomePage() {
                           <p className="product__stock">Out of stock</p>
                         )}
                       </Link>
+                      <div className="product__actions">
+                        <SaveButton product={product} compact />
+                        <AddToCartButton product={product} />
+                      </div>
                     </article>
                   </li>
                 )
