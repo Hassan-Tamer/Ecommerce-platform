@@ -61,6 +61,12 @@
     opacity 0.16s ease;
 }
 
+.announcements-desk__list {
+  max-height: 24rem;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
 .announcements-desk__hint {
   margin: 0 0 0.75rem;
   color: var(--muted);

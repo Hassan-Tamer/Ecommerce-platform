@@ -176,6 +176,27 @@ class CartItem(Base):
     product: Mapped[Product] = relationship(back_populates="cart_items")
 
 
+class Coupon(Base):
+    __tablename__ = "coupons"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    discount_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    discount_value: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    min_subtotal: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
+    max_discount: Mapped[Optional[Decimal]] = mapped_column(Numeric(12, 2), nullable=True)
+    starts_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    ends_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    usage_limit: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    per_user_limit: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+
 class Announcement(Base):
     __tablename__ = "announcements"
 

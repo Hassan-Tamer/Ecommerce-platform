@@ -79,10 +79,12 @@ Delete stale carts in a background job [ ]
 
 ### Coupons
 
-`coupons` + `coupon_redemptions` [ ]
-`POST /cart/coupon` — validate code, return new total [ ]
+`coupons` table [x]  
+`POST /cart/coupon` — validate code, return subtotal / discount / total [x]  
+`GET|POST|PATCH|DELETE /admin/coupons` [x]  
+`coupon_redemptions` (on order place) [ ]
 
-admin add a coupon
+admin add a coupon [x]
 
 ### Reviews
 

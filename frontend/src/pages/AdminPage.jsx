@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { isLowStock, useCatalog } from '../features/admin/catalogStore'
 import DeskAnnouncementsSection from '../features/admin/DeskAnnouncementsSection'
+import DeskCouponsSection from '../features/admin/DeskCouponsSection'
 import { useAuth } from '../features/auth/context/AuthContext'
 import { notImplemented } from '../lib/notImplemented'
 import './AdminPage.css'
@@ -102,6 +103,14 @@ export default function AdminPage() {
           )}
         </section>
       </div>
+
+      <section className="admin__card admin__announcements" id="coupons" aria-labelledby="coupons-heading">
+        <h2 id="coupons-heading">Coupons</h2>
+        <p className="admin__section-lead">
+          Codes shoppers can apply at checkout. Percent coupons can cap the discount.
+        </p>
+        <DeskCouponsSection />
+      </section>
 
       <section className="admin__card admin__announcements" id="announcements" aria-labelledby="announcements-heading">
         <h2 id="announcements-heading">Announcements</h2>

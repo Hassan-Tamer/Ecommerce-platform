@@ -1,12 +1,11 @@
 from decimal import Decimal
-
-from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.cart.schemas import CartLineOut, CartOut
 from app.db.models import CartItem, Product, User
 from app.products.service import _product_to_out
+from fastapi import HTTPException
 
 _CART_ITEM_LOAD = (
     selectinload(CartItem.product).selectinload(Product.category),

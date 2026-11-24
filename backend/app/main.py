@@ -11,6 +11,8 @@ from app.products import admin_router as products_admin_router
 from app.products import router as products_router
 from app.ratelimit import limiter
 from app.cart import router as cart_router
+from app.coupons import admin_router as coupons_admin_router
+from app.coupons import router as coupons_router
 from app.wishlist import router as wishlist_router
 
 
@@ -43,6 +45,8 @@ app.include_router(announcements_router)
 app.include_router(announcements_admin_router)
 app.include_router(wishlist_router)
 app.include_router(cart_router)
+app.include_router(coupons_router)
+app.include_router(coupons_admin_router)
 
 @app.get("/health")
 def health():

@@ -159,14 +159,50 @@
   width: 100%;
 }
 
-.cart-page__total {
+.cart-page__coupon-error {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--danger, #b42318);
+}
+
+.cart-page__coupon-applied {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-muted, #5c5c5c);
+}
+
+.cart-page__totals {
+  margin: 1.15rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.cart-page__total-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  margin: 1.15rem 0;
-  padding-top: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.cart-page__total-row dt,
+.cart-page__total-row dd {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.cart-page__total-row--discount dd {
+  color: var(--success, #067647);
+}
+
+.cart-page__total.cart-page__total-row {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--border);
+}
+
+.cart-page__total.cart-page__total-row dt {
+  font-weight: 600;
 }
 
 .cart-page__total strong {

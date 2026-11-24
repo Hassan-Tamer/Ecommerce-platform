@@ -9,3 +9,8 @@ class TokenType(str, Enum):
 class UserRole(str, Enum):
     CUSTOMER = "customer"
     ADMIN = "admin"
+
+
+class DiscountType(str, Enum):
+    PERCENT = "percent"
+    FIXED = "fixed"

@@ -8,6 +8,10 @@
   text-decoration: none;
 }
 
+.admin__links a.btn--ghost {
+  color: var(--text);
+}
+
 .admin__top {
   display: flex;
   flex-wrap: wrap;

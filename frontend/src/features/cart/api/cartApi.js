@@ -21,3 +21,10 @@ export function updateCartItem(productId, quantity) {
 export function removeCartItem(productId) {
   return apiRequest(`/cart/items/${productId}`, { method: 'DELETE' })
 }
+
+export function applyCartCoupon(code) {
+  return apiRequest('/cart/coupon', {
+    method: 'POST',
+    body: JSON.stringify({ code: code.trim() }),
+  })
+}
