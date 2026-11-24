@@ -58,6 +58,9 @@ export default function CartPage() {
                             type="button"
                             aria-label={`Increase ${item.name}`}
                             onClick={() => setQuantity(item.id, item.quantity + 1)}
+                            disabled={
+                              item.stockQuantity != null && item.quantity >= item.stockQuantity
+                            }
                           >
                             +
                           </button>

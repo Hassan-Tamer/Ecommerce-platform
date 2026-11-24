@@ -65,9 +65,10 @@ add email in profile [ ]
 
 ### Cart
 
-`carts` + `cart_items` (or browser-only until checkout — decide) [ ]  
-`GET /cart`, `POST /cart/items`, `PATCH /cart/items/{id}`, `DELETE /cart/items/{id}` [ ]  
-Guest cart: none (signed-out → `/login`) [ ]
+`cart_items` (`user_id` + `product_id` PK) [x]  
+`GET /cart`, `POST /cart/items`, `PATCH /cart/items/{product_id}`, `DELETE /cart/items/{product_id}` [x]
+
+Delete stale carts in a background job [ ]
 
 ### Checkout & orders
 
@@ -80,6 +81,8 @@ Guest cart: none (signed-out → `/login`) [ ]
 
 `coupons` + `coupon_redemptions` [ ]
 `POST /cart/coupon` — validate code, return new total [ ]
+
+admin add a coupon
 
 ### Reviews
 
