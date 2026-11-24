@@ -68,7 +68,7 @@ add email in profile [ ]
 `cart_items` (`user_id` + `product_id` PK) [x]  
 `GET /cart`, `POST /cart/items`, `PATCH /cart/items/{product_id}`, `DELETE /cart/items/{product_id}` [x]
 
-Delete stale carts in a background job [ ]
+Delete stale carts in a background job [x]
 
 ### Checkout & orders
 
@@ -130,6 +130,12 @@ REDIS
 docker run -d --name redis \
   -p 6379:6379 \
   redis:7-alpine
+```
+
+Celery worker and beat (deletes carts last touched more than 7 days ago, every day at 01:25 in `CELERY_TIMEZONE`, otherwise the host timezone):
+
+```
+cd backend && PYTHONPATH=. celery -A app.tasks.celery_app:celery_app worker --beat --loglevel=info
 ```
 
 MinIO (S3 API on host :9001, console :9002 — create bucket `product-images`, then optional public read for dev)
