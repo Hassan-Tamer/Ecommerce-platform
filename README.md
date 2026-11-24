@@ -149,3 +149,6 @@ docker run -d --name minio \
     cgr.dev/chainguard/minio:latest server /data --console-address ":9001"
 ```
 
+
+
+celery -A app.tasks.celery_app:celery_app worker --beat --loglevel=info

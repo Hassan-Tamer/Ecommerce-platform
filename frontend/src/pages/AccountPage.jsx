@@ -66,8 +66,20 @@ export default function AccountPage() {
             <div className="account__fields">
               <FormField id="account-name" label="Name" value={name} onChange={(event) => setName(event.target.value)} required />
               <div className="account__email">
-                <span className="form-field__label">Email</span>
-                <p>{user?.email || '—'}</p>
+                <div className="account__email-label">
+                  <span className="form-field__label" id="account-email-label">
+                    Email
+                  </span>
+                  <span className="account__email-note">Can’t be changed</span>
+                </div>
+                <input
+                  id="account-email"
+                  className="account__email-value"
+                  value={user?.email || 'No email on this account'}
+                  readOnly
+                  aria-readonly="true"
+                  aria-labelledby="account-email-label"
+                />
               </div>
               <FormField id="account-phone" label="Phone" type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} />
             </div>
