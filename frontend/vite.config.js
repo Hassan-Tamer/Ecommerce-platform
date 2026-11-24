@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
           },
         },
         '/health': { target: apiTarget, changeOrigin: true },
+        '/announcements': { target: apiTarget, changeOrigin: true },
         '/products/categories': { target: apiTarget, changeOrigin: true },
         '/products/slug': { target: apiTarget, changeOrigin: true },
         '/products': {

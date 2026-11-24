@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { isLowStock, useCatalog } from '../features/admin/catalogStore'
+import DeskAnnouncementsSection from '../features/admin/DeskAnnouncementsSection'
 import { useAuth } from '../features/auth/context/AuthContext'
 import { notImplemented } from '../lib/notImplemented'
 import './AdminPage.css'
@@ -101,6 +102,14 @@ export default function AdminPage() {
           )}
         </section>
       </div>
+
+      <section className="admin__card admin__announcements" id="announcements" aria-labelledby="announcements-heading">
+        <h2 id="announcements-heading">Announcements</h2>
+        <p className="admin__section-lead">
+          Home-page notices. The shop shows three at a time and rotates through active rows.
+        </p>
+        <DeskAnnouncementsSection />
+      </section>
     </article>
   )
 }

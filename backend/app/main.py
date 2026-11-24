@@ -4,6 +4,8 @@ from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
+from app.announcements import admin_router as announcements_admin_router
+from app.announcements import router as announcements_router
 from app.auth import router as auth_router
 from app.products import admin_router as products_admin_router
 from app.products import router as products_router
@@ -35,6 +37,8 @@ app.add_middleware(
 app.include_router(auth_router, tags=["auth"])
 app.include_router(products_router)
 app.include_router(products_admin_router)
+app.include_router(announcements_router)
+app.include_router(announcements_admin_router)
 
 @app.get("/health")
 def health():

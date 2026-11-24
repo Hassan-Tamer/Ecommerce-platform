@@ -11,3 +11,4 @@ slowapi>=0.1.9
 redis>=5.0.0
 minio
 awscli
+fractional-indexing>=0.1.3

@@ -170,6 +170,18 @@
   color: var(--muted);
 }
 
+.admin__announcements {
+  margin-top: 0.85rem;
+  padding-bottom: 1.25rem;
+}
+
+.admin__section-lead {
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 900px) {
   .admin__stats,
   .admin__split {
