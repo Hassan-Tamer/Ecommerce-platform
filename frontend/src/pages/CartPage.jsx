@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { formatPrice } from '../features/catalog/api/productsApi'
 import { useCart } from '../features/cart/CartContext'
 import Button from '../components/Button'
+import Icon from '../components/icons'
 import { notImplemented } from '../lib/notImplemented'
 import './CartPage.css'
 
@@ -15,9 +16,16 @@ export default function CartPage() {
     <article className="desk cart-page">
       <h1>Your cart</h1>
       {items.length === 0 ? (
-        <p className="desk__lead">
-          The cart is empty. <Link to="/">Shop the catalog</Link>
-        </p>
+        <div className="cart-empty">
+          <div className="cart-empty__mark" aria-hidden="true">
+            <Icon name="cart" />
+          </div>
+          <h2>Your cart is empty</h2>
+          <p>Add something from the catalog and it will show up here.</p>
+          <Link className="btn btn--primary" to="/">
+            Shop the catalog
+          </Link>
+        </div>
       ) : (
         <>
           <p className="desk__lead">Change a quantity here. Checkout is where you pay.</p>

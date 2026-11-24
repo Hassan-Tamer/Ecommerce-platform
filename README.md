@@ -16,16 +16,28 @@ Observability [ ]
 
 ## AI & LLM
 
-Shop assistant UI (frontend mock) [x]
-`POST /assistant/messages` — shopper message in, reply out [ ]
-Assistant scoped to catalog + signed-in user's orders [ ]
-LLM provider wiring (model, API keys, timeouts) [ ]
-Optional prompt / tool layer for product lookup and order status [ ]
-Optional `assistant_messages` persistence (`user_id`, `role`, `body`, `created_at`) [ ]
-Chatbot (broader than shop assistant) [ ]
-Recommendation [ ]
-Review summarizer [ ]
+Shop assistant UI (frontend mock) [x]  
+`POST /assistant/messages` — shopper message in, reply out [ ]  
+Assistant scoped to catalog + signed-in user's orders [ ]  
+LLM provider wiring (model, API keys, timeouts) [ ]  
+Optional prompt / tool layer for product lookup and order status [ ]  
+Optional `assistant_messages` persistence (`user_id`, `role`, `body`, `created_at`) [ ]  
+Chatbot (broader than shop assistant) [ ]  
+Recommendation [ ]  
+Review summarizer [ ]  
 Semantic search [ ]
+
+### Announcements
+
+`announcements` model + `GET /announcements` (shop) [x]
+
+ `POST` / `PATCH` / `DELETE /admin/announcements` [x]
+
+### Wishlist
+
+`wishlist_items` (`user_id` + `product_id` PK) [x] 
+
+`GET /wishlist`, `PUT /wishlist/{product_id}`, `DELETE /wishlist/{product_id}` [x]
 
 ## Admin Portal
 
@@ -49,16 +61,13 @@ Address table: `street`, `city`, `region`, `postal_code` (one per user) [ ]
 `PUT /auth/me/address` [ ]
 `POST /auth/me/photo` (MinIO, public URL) [ ]
 
+add email in profile [ ]
+
 ### Cart
 
-`carts` + `cart_items` (or browser-only until checkout — decide) [ ]
-`GET /cart`, `POST /cart/items`, `PATCH /cart/items/{id}`, `DELETE /cart/items/{id}` [ ]
+`carts` + `cart_items` (or browser-only until checkout — decide) [ ]  
+`GET /cart`, `POST /cart/items`, `PATCH /cart/items/{id}`, `DELETE /cart/items/{id}` [ ]  
 Guest cart: none (signed-out → `/login`) [ ]
-
-### Wishlist
-
-`wishlist_items` (`user_id` + `product_id` PK) [x]
-`GET /wishlist`, `PUT /wishlist/{product_id}`, `DELETE /wishlist/{product_id}` [x]
 
 ### Checkout & orders
 
@@ -90,14 +99,8 @@ Admin UI gated on JWT `role` === `admin` [ ]
 
 ### Orders & tracking
 
-Order statuses: `placed`, `packing`, `shipped`, `out_for_delivery`, `delivered` [ ]
+Order statuses: `placed`, `packing`, `shipped`, `out_for_delivery`, `delivered` [ ]  
 `GET /orders/{id}/tracking` — `{ lat, lng, updated_at }` while out for delivery [ ]
-
-### Announcements
-
-`announcements` model + `GET /announcements` (shop) [x]
-
- `POST` / `PATCH` / `DELETE /admin/announcements` [x]
 
 ## Important commands
 

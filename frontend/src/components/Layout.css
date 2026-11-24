@@ -29,13 +29,13 @@
 }
 
 .layout__inner {
-  max-width: var(--max-width);
+  width: min(100%, 86rem);
   margin: 0 auto;
-  padding: 0.9rem 1.25rem;
+  padding: 0.9rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .icon {
@@ -87,7 +87,7 @@
   flex-wrap: nowrap;
   justify-content: flex-end;
   min-width: 0;
-  gap: 0.15rem;
+  gap: 0.35rem;
 }
 
 .layout__link {

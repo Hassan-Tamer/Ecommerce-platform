@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { pathAfterAuth } from '../pathAfterAuth'
 import Button from '../../../components/Button'
 import FormField from '../../../components/FormField'
 
@@ -21,8 +22,7 @@ export default function RegisterForm() {
       setLocalError('Passwords do not match.')
       return
     }
-    const requested = location.state?.from
-    const next = typeof requested === 'string' && requested.startsWith('/') ? requested : '/account'
+    const next = pathAfterAuth(location.state?.from)
     try {
       await register({ name, email, password, confirmPassword })
       navigate(next, { replace: true })
