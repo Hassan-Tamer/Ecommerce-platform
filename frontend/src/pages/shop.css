@@ -340,9 +340,59 @@
   margin-bottom: 0.75rem;
 }
 
+.reviews__summary {
+  margin-bottom: 0.35rem;
+}
+
 .reviews__empty {
   color: var(--muted);
   margin-bottom: 1rem;
+}
+
+.reviews__list {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+
+.reviews__item {
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.reviews__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.reviews__top strong {
+  font-weight: 600;
+}
+
+.reviews__top time {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.reviews__item .stars {
+  margin-top: 0.3rem;
+}
+
+.reviews__item p {
+  margin-top: 0.35rem;
+  line-height: 1.45;
+}
+
+.reviews__error {
+  color: var(--danger);
+  font-size: 0.92rem;
+}
+
+.reviews__signin {
+  margin-top: 1.1rem;
 }
 
 .reviews__stars {
@@ -361,19 +411,32 @@
 }
 
 .reviews__stars button {
-  min-width: 2.25rem;
-  padding: 0.4rem 0.65rem;
+  display: grid;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0;
   border: 0;
   border-radius: 999px;
-  background: var(--field);
-  font: inherit;
+  background: transparent;
+  color: var(--border);
   cursor: pointer;
 }
 
+.reviews__stars button svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: currentColor;
+}
+
+.reviews__stars button.is-on,
 .reviews__stars button[aria-pressed='true'] {
-  background: var(--counter);
-  border-color: var(--counter);
-  color: var(--counter-ink);
+  background: transparent;
+  color: var(--brass);
+}
+
+.reviews__stars button:hover {
+  color: var(--brass);
 }
 
 .reviews form {

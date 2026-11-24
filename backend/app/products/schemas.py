@@ -36,6 +36,8 @@ class ProductOut(BaseModel):
     is_active: bool
     category: CategoryBrief
     images: list[ProductImageOut]
+    review_average: float = 0.0
+    review_count: int = 0
 
 
 class ProductListPage(BaseModel):

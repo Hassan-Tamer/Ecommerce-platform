@@ -295,6 +295,10 @@
   font-size: 0.875rem;
 }
 
+.product__rating {
+  margin-top: 0.4rem;
+}
+
 .product__stock {
   color: var(--danger);
 }

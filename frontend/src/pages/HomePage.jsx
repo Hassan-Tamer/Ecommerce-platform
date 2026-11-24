@@ -4,6 +4,7 @@ import AddToCartButton from '../components/AddToCartButton'
 import SaveButton from '../components/SaveButton'
 import Announcements from '../components/Announcements'
 import { formatPrice, listCategories, listProducts } from '../features/catalog/api/productsApi'
+import StarRating from '../features/reviews/StarRating'
 import './HomePage.css'
 
 const SORTS = [
@@ -343,6 +344,8 @@ export default function HomePage() {
             <ul className="catalog__grid">
               {products.map((product) => {
                 const image = product.images?.[0]
+                const reviewAverage = Number(product.review_average) || 0
+                const reviewCount = Number(product.review_count) || 0
                 return (
                   <li key={product.id}>
                     <article className="product">
@@ -365,6 +368,15 @@ export default function HomePage() {
                         <p className="product__meta">
                           {product.category?.name ? categoryLabel(product.category.name) : ''}
                         </p>
+                        {reviewCount > 0 ? (
+                          <p className="product__rating">
+                            <StarRating
+                              value={reviewAverage}
+                              caption={`${reviewAverage.toFixed(1)} · ${reviewCount}`}
+                              size="sm"
+                            />
+                          </p>
+                        ) : null}
                         {product.stock_quantity === 0 && (
                           <p className="product__stock">Out of stock</p>
                         )}

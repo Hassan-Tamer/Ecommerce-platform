@@ -88,10 +88,10 @@ admin add a coupon [x]
 
 ### Reviews
 
-`reviews` (`user_id` + `product_id` unique, rating 1–5) [ ]
-`GET /products/slug/{slug}/reviews` [ ]
-`POST /products/slug/{slug}/reviews` [ ]
-`PATCH` / `DELETE` for author [ ]
+`reviews` (`user_id` + `product_id` unique, rating 1–5) [x]
+`GET /products/slug/{slug}/reviews` [x]
+`POST /products/slug/{slug}/reviews` [x]
+`DELETE /admin/reviews/{id}` [x]
 
 ### Admin
 

@@ -5,6 +5,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.db.models import Category, Product
+from app.reviews.service import review_summaries_for_products
 from app.products.pagination import (
     DEFAULT_PAGE_SIZE,
     MAX_PAGE_SIZE,
@@ -23,7 +24,13 @@ from app.products.schemas import (
 )
 
 
-def _product_to_out(product: Product, *, include_stock: bool) -> ProductOut:
+def _product_to_out(
+    product: Product,
+    *,
+    include_stock: bool,
+    review_average: float = 0.0,
+    review_count: int = 0,
+) -> ProductOut:
     return ProductOut(
         id=product.id,
         name=product.name,
@@ -41,6 +48,8 @@ def _product_to_out(product: Product, *, include_stock: bool) -> ProductOut:
             )
             for image in product.images
         ],
+        review_average=review_average,
+        review_count=review_count,
     )
 
 
@@ -116,8 +125,18 @@ def list_products(
     has_more = len(rows) > limit
     page = rows[:limit]
 
+    summaries = review_summaries_for_products(db, [product.id for product in page])
+
     return ProductListPage(
-        items=[_product_to_out(p, include_stock=include_stock) for p in page],
+        items=[
+            _product_to_out(
+                product,
+                include_stock=include_stock,
+                review_average=summaries.get(product.id, (0.0, 0))[0],
+                review_count=summaries.get(product.id, (0.0, 0))[1],
+            )
+            for product in page
+        ],
         next_cursor=encode_next_cursor(sort, page[-1]) if has_more else None,
     )
 

@@ -2,7 +2,20 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    SmallInteger,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.enums import UserRole
@@ -31,6 +44,10 @@ class User(Base):
         cascade="all, delete-orphan",
     )
     cart_items: Mapped[list["CartItem"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    reviews: Mapped[list["Review"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
     )
@@ -103,6 +120,10 @@ class Product(Base):
     )
     wishlist_items: Mapped[list["WishlistItem"]] = relationship(back_populates="product")
     cart_items: Mapped[list["CartItem"]] = relationship(back_populates="product")
+    reviews: Mapped[list["Review"]] = relationship(
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )
 
 
 class ProductImage(Base):
@@ -174,6 +195,44 @@ class CartItem(Base):
 
     user: Mapped[User] = relationship(back_populates="cart_items")
     product: Mapped[Product] = relationship(back_populates="cart_items")
+
+
+class Review(Base):
+    __tablename__ = "reviews"
+    __table_args__ = (
+        UniqueConstraint("user_id", "product_id", name="uq_review_user_product"),
+        CheckConstraint("rating BETWEEN 1 AND 5", name="ck_review_rating_range"),
+        Index("ix_reviews_product_created", "product_id", "created_at"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    rating: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    title: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    user: Mapped[User] = relationship(back_populates="reviews")
+    product: Mapped[Product] = relationship(back_populates="reviews")
 
 
 class Coupon(Base):

@@ -1,0 +1,64 @@
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stars__row,
+.stars__picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+}
+
+.stars__star {
+  position: relative;
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+}
+
+.stars--sm .stars__star {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.stars__empty,
+.stars__fill {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.stars__fill {
+  overflow: hidden;
+}
+
+.stars__empty svg,
+.stars__fill svg {
+  display: block;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.stars--sm .stars__empty svg,
+.stars--sm .stars__fill svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.stars__empty svg {
+  fill: var(--border);
+}
+
+.stars__fill svg {
+  fill: var(--brass);
+}
+
+.stars__caption {
+  line-height: 1.2;
+}
