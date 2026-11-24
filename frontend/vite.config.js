@@ -23,6 +23,15 @@ export default defineConfig(({ mode }) => {
         },
         '/health': { target: apiTarget, changeOrigin: true },
         '/announcements': { target: apiTarget, changeOrigin: true },
+        '/wishlist': {
+          target: apiTarget,
+          changeOrigin: true,
+          bypass(req) {
+            if (req.headers?.accept?.includes('text/html')) {
+              return '/index.html'
+            }
+          },
+        },
         '/products/categories': { target: apiTarget, changeOrigin: true },
         '/products/slug': { target: apiTarget, changeOrigin: true },
         '/products': {

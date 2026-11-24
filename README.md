@@ -38,7 +38,7 @@ Dashboard [ ]
 
 ## Shop screens — backend TODO
 
-Frontend account, cart, checkout, reviews, coupons, assistant, and admin flows are mocks (`alert` / in-memory cart). Details: [docs/frontend-backend-needs.md](docs/frontend-backend-needs.md).
+Frontend account, cart, checkout, reviews, coupons, assistant, and admin flows are mocks (`alert` / in-memory cart). Wishlist uses the API. Details: [docs/frontend-backend-needs.md](docs/frontend-backend-needs.md).
 
 ### Account
 
@@ -57,8 +57,8 @@ Guest cart: none (signed-out → `/login`) [ ]
 
 ### Wishlist
 
-`wishlists` + `wishlist_items` [ ]
-`GET /wishlist`, `POST /wishlist/items`, `DELETE /wishlist/items/{product_id}` [ ]
+`wishlist_items` (`user_id` + `product_id` PK) [x]
+`GET /wishlist`, `PUT /wishlist/{product_id}`, `DELETE /wishlist/{product_id}` [x]
 
 ### Checkout & orders
 

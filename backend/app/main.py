@@ -10,6 +10,7 @@ from app.auth import router as auth_router
 from app.products import admin_router as products_admin_router
 from app.products import router as products_router
 from app.ratelimit import limiter
+from app.wishlist import router as wishlist_router
 
 
 def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
@@ -39,6 +40,7 @@ app.include_router(products_router)
 app.include_router(products_admin_router)
 app.include_router(announcements_router)
 app.include_router(announcements_admin_router)
+app.include_router(wishlist_router)
 
 @app.get("/health")
 def health():

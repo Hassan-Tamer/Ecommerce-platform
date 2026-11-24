@@ -3,21 +3,31 @@ import { formatPrice } from '../features/catalog/api/productsApi'
 import { useCart } from '../features/cart/CartContext'
 import { useWishlist } from '../features/wishlist/WishlistContext'
 import Button from '../components/Button'
+import Icon from '../components/icons'
 
 export default function WishlistPage() {
-  const { items, removeItem } = useWishlist()
+  const { items, loading, removeItem } = useWishlist()
   const { addItem } = useCart()
 
   return (
     <article className="desk">
       <h1>Wishlist</h1>
-      {items.length === 0 ? (
-        <p className="desk__lead">
-          Nothing saved yet. <Link to="/">Shop the catalog</Link>
-        </p>
+      {loading ? (
+        <p className="desk__lead">Loading your saved items…</p>
+      ) : items.length === 0 ? (
+        <div className="wishlist-empty">
+          <div className="wishlist-empty__mark" aria-hidden="true">
+            <Icon name="heart" />
+          </div>
+          <h2>Nothing saved yet</h2>
+          <p>Use the heart on a product to keep it here.</p>
+          <Link className="btn btn--primary" to="/">
+            Shop the catalog
+          </Link>
+        </div>
       ) : (
         <>
-          <p className="desk__lead">Saved in this browser until you refresh.</p>
+          <p className="desk__lead">Saved to your account.</p>
           <ul className="desk__lines">
             {items.map((item) => (
               <li key={item.id} className="cart-line">

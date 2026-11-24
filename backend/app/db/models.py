@@ -26,6 +26,10 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    wishlist_items: Mapped[list["WishlistItem"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
 
 class RefreshToken(Base):
@@ -93,6 +97,7 @@ class Product(Base):
         cascade="all, delete-orphan",
         order_by="ProductImage.position",
     )
+    wishlist_items: Mapped[list["WishlistItem"]] = relationship(back_populates="product")
 
 
 class ProductImage(Base):
@@ -113,6 +118,28 @@ class ProductImage(Base):
     )
 
     product: Mapped[Product] = relationship(back_populates="images")
+
+
+class WishlistItem(Base):
+    __tablename__ = "wishlist_items"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"),
+        primary_key=True,
+        index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    user: Mapped[User] = relationship(back_populates="wishlist_items")
+    product: Mapped[Product] = relationship(back_populates="wishlist_items")
 
 
 class Announcement(Base):
