@@ -58,6 +58,9 @@ const PATHS = {
   close: (
     <path d="M7 7l10 10M17 7 7 17" />
   ),
+  send: (
+    <path d="M5 12h12.5M13 7.5 17.5 12 13 16.5" />
+  ),
   orders: (
     <>
       <path d="M4.5 8.5 12 4.5l7.5 4v11L12 19.5l-7.5-4z" />

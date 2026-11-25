@@ -97,7 +97,7 @@ export default function Layout() {
       <main id="main" className="layout__main">
         <Outlet />
       </main>
-      <Assistant />
+      {ready && isAuthenticated ? <Assistant /> : null}
     </div>
   )
 }

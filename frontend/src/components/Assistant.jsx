@@ -48,10 +48,11 @@ export default function Assistant() {
       >
         <span className="assistant__mark" aria-hidden="true">
           <Icon name="chat" />
+          <span className="assistant__live" />
         </span>
         <span className="assistant__copy">
           <span className="assistant__title">Shop assistant</span>
-          <span className="assistant__hint">Help with a product or an order</span>
+          <span className="assistant__hint">Ask about a product or order</span>
         </span>
       </button>
 
@@ -64,18 +65,27 @@ export default function Assistant() {
         aria-labelledby={titleId}
       >
         <header className="assistant__head">
-          <div>
+          <span className="assistant__avatar" aria-hidden="true">
+            <Icon name="chat" />
+            <span className="assistant__live" />
+          </span>
+          <div className="assistant__identity">
             <h2 id={titleId}>Shop assistant</h2>
-            <p>Products, orders, and the shop.</p>
+            <p>Online now</p>
           </div>
           <button type="button" className="assistant__close" aria-label="Close shop assistant" onClick={close}>
             <Icon name="close" />
           </button>
         </header>
         <div className="assistant__thread">
-          <p className="assistant__bubble">
-            Tell me what you are looking for, or ask about an order.
-          </p>
+          <div className="assistant__message">
+            <span className="assistant__avatar assistant__avatar--sm" aria-hidden="true">
+              <Icon name="chat" />
+            </span>
+            <p className="assistant__bubble">
+              Tell me what you are looking for, or ask about an order.
+            </p>
+          </div>
         </div>
         <form className="assistant__composer" onSubmit={send}>
           <label className="visually-hidden" htmlFor="assistant-message">
@@ -84,13 +94,13 @@ export default function Assistant() {
           <textarea
             ref={inputRef}
             id="assistant-message"
-            rows={2}
+            rows={1}
             placeholder="Write a message"
             value={message}
             onChange={(event) => setMessage(event.target.value)}
           />
-          <button type="submit" className="assistant__send">
-            Send
+          <button type="submit" className="assistant__send" aria-label="Send message">
+            <Icon name="send" />
           </button>
         </form>
       </section>
