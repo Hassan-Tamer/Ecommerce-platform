@@ -153,10 +153,16 @@ def create_order_from_cart(
     subtotal = _money(cart.subtotal)
     discount = Decimal("0")
     coupon_code: str | None = None
+    coupon = None
 
     if data.coupon_code:
         coupon = coupon_service.find_coupon_by_code(db, data.coupon_code)
-        coupon_service.validate_coupon_for_cart(coupon=coupon, subtotal=subtotal)
+        coupon_service.validate_coupon_for_user(
+            db,
+            coupon=coupon,
+            subtotal=subtotal,
+            user_id=user.id,
+        )
         discount = coupon_service.compute_discount(subtotal, coupon)
         coupon_code = coupon.code
 
@@ -191,6 +197,16 @@ def create_order_from_cart(
         items=order_items,
     )
     db.add(order)
+    db.flush()
+
+    if coupon is not None:
+        coupon_service.record_coupon_redemption(
+            db,
+            coupon=coupon,
+            user=user,
+            order_id=order.id,
+            discount_amount=discount,
+        )
 
     for row in cart_rows:
         product = row.product

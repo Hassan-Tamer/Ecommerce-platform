@@ -41,12 +41,7 @@ Semantic search [ ]
 
 ## Admin Portal
 
-Populate products [x]
-CRUD for products [ ]
-Pagination [x] 
-MinIO [x]
-Redis [x]
-Dashboard [ ]
+Populate products [x] CRUD for products [x] Pagination [x]  MinIO [x] Redis [x] Dashboard [x]
 
 ## Shop screens — backend TODO
 
@@ -68,17 +63,20 @@ Delete stale carts in a background job [x]
 
 ### Checkout & orders
 
-`orders` + `order_items` (price snapshot at purchase) [ ]
-`POST /orders` from cart (clear cart) [ ]
-`GET /orders`, `GET /orders/{id}` [ ]
-`payment_method`: `cash` | `card` (no stored card number; provider charge id) [ ]
+`orders` + `order_items` (price snapshot at purchase) [x]
+
+ `POST /orders` from cart (clear cart) [x] 
+
+`GET /orders`, `GET /orders/{id}` [x] 
+
+`payment_method`: `cash` | `card` (no stored card number; provider charge id) [x]
 
 ### Coupons
 
 `coupons` table [x]  
 `POST /cart/coupon` — validate code, return subtotal / discount / total [x]  
 `GET|POST|PATCH|DELETE /admin/coupons` [x]  
-`coupon_redemptions` (on order place) [ ]
+`coupon_redemptions` (on order place) [x]
 
 admin add a coupon [x]
 
@@ -144,7 +142,5 @@ docker run -d --name minio \
     -v minio_data:/data \
     cgr.dev/chainguard/minio:latest server /data --console-address ":9001"
 ```
-
-
 
 celery -A app.tasks.celery_app:celery_app worker --beat --loglevel=info

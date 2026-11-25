@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.cart import service as cart_service
-from app.db.models import Coupon, User
+from app.db.models import Coupon, CouponRedemption, User
 from app.enums import DiscountType
 
 from .schemas import CouponBrief, CouponCreate, CouponOut, CouponPricingOut, CouponUpdate
@@ -133,6 +133,13 @@ def coupon_brief(coupon: Coupon) -> CouponBrief:
     )
 
 
+def _redemption_count(db: Session, *, coupon_id: int, user_id: int | None = None) -> int:
+    stmt = select(func.count()).select_from(CouponRedemption).where(CouponRedemption.coupon_id == coupon_id)
+    if user_id is not None:
+        stmt = stmt.where(CouponRedemption.user_id == user_id)
+    return db.scalar(stmt) or 0
+
+
 def validate_coupon_for_cart(
     *,
     coupon: Coupon,
@@ -154,6 +161,44 @@ def validate_coupon_for_cart(
         )
 
 
+def validate_coupon_for_user(
+    db: Session,
+    *,
+    coupon: Coupon,
+    subtotal: Decimal,
+    user_id: int,
+) -> None:
+    validate_coupon_for_cart(coupon=coupon, subtotal=subtotal)
+
+    if coupon.usage_limit is not None:
+        total_uses = _redemption_count(db, coupon_id=coupon.id)
+        if total_uses >= coupon.usage_limit:
+            raise HTTPException(status_code=400, detail="Coupon usage limit reached")
+
+    if coupon.per_user_limit is not None:
+        user_uses = _redemption_count(db, coupon_id=coupon.id, user_id=user_id)
+        if user_uses >= coupon.per_user_limit:
+            raise HTTPException(status_code=400, detail="Coupon limit reached for this account")
+
+
+def record_coupon_redemption(
+    db: Session,
+    *,
+    coupon: Coupon,
+    user: User,
+    order_id: int,
+    discount_amount: Decimal,
+) -> CouponRedemption:
+    row = CouponRedemption(
+        coupon_id=coupon.id,
+        user_id=user.id,
+        order_id=order_id,
+        discount_amount=discount_amount,
+    )
+    db.add(row)
+    return row
+
+
 def find_coupon_by_code(db: Session, code: str) -> Coupon:
     normalized = normalize_code(code)
     coupon = db.scalar(select(Coupon).where(func.upper(Coupon.code) == normalized))
@@ -168,7 +213,7 @@ def apply_to_cart(db: Session, *, user: User, code: str) -> CouponPricingOut:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
     coupon = find_coupon_by_code(db, code)
-    validate_coupon_for_cart(coupon=coupon, subtotal=cart.subtotal)
+    validate_coupon_for_user(db, coupon=coupon, subtotal=cart.subtotal, user_id=user.id)
     discount = compute_discount(cart.subtotal, coupon)
     total = cart.subtotal - discount
     return CouponPricingOut(

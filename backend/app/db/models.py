@@ -294,6 +294,10 @@ class Order(Base):
         back_populates="order",
         cascade="all, delete-orphan",
     )
+    coupon_redemption: Mapped[Optional["CouponRedemption"]] = relationship(
+        back_populates="order",
+        uselist=False,
+    )
 
 
 class OrderItem(Base):
@@ -321,6 +325,39 @@ class OrderItem(Base):
     product: Mapped[Optional[Product]] = relationship()
 
 
+class CouponRedemption(Base):
+    __tablename__ = "coupon_redemptions"
+    __table_args__ = (
+        Index("ix_coupon_redemptions_coupon", "coupon_id"),
+        Index("ix_coupon_redemptions_user_coupon", "user_id", "coupon_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    coupon_id: Mapped[int] = mapped_column(
+        ForeignKey("coupons.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+    )
+    discount_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    coupon: Mapped["Coupon"] = relationship(back_populates="redemptions")
+    user: Mapped[User] = relationship()
+    order: Mapped["Order"] = relationship(back_populates="coupon_redemption")
+
+
 class Coupon(Base):
     __tablename__ = "coupons"
 
@@ -340,6 +377,8 @@ class Coupon(Base):
         server_default=func.now(),
         nullable=False,
     )
+
+    redemptions: Mapped[list["CouponRedemption"]] = relationship(back_populates="coupon")
 
 
 class Announcement(Base):
