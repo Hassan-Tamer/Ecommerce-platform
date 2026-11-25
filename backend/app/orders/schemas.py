@@ -59,6 +59,7 @@ class AdminLowStockOut(BaseModel):
     id: int
     name: str
     stock_quantity: int
+    stock_alert_at: int
 
 
 class AdminSummaryOut(BaseModel):

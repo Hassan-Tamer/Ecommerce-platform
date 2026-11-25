@@ -16,6 +16,7 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 ALLOWED_IMAGE_TYPES = frozenset({"image/jpeg", "image/png", "image/webp", "image/gif"})
 MAX_AVATAR_BYTES = 5 * 1024 * 1024
+MAX_PRODUCT_IMAGE_BYTES = 8 * 1024 * 1024
 
 _CONTENT_TYPE_EXT = {
     "image/jpeg": "jpg",
@@ -77,6 +78,10 @@ def user_avatar_prefix(user_id: int) -> str:
     return f"avatars/{user_id}/"
 
 
+def product_image_prefix(product_id: int) -> str:
+    return f"products/{product_id}/"
+
+
 def content_type_from_filename(filename: str | None) -> str | None:
     if not filename:
         return None
@@ -136,6 +141,43 @@ def upload_user_avatar(
         )
     except S3Error as exc:
         raise HTTPException(status_code=503, detail="Could not save photo to storage") from exc
+    return object_key
+
+
+def upload_product_image(
+    *,
+    product_id: int,
+    data: bytes,
+    content_type: str,
+    filename: str | None,
+) -> str:
+    if content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=400, detail="Image must be JPEG, PNG, WebP, or GIF")
+    if len(data) > MAX_PRODUCT_IMAGE_BYTES:
+        raise HTTPException(status_code=400, detail="Image must be 8 MB or smaller")
+    if len(data) == 0:
+        raise HTTPException(status_code=400, detail="Image file is empty")
+
+    bucket = _bucket()
+    client = get_minio_client()
+    if not client.bucket_exists(bucket):
+        raise HTTPException(
+            status_code=503,
+            detail=f"Storage bucket {bucket!r} is not available",
+        )
+
+    ext = _extension(content_type=content_type, filename=filename)
+    object_key = f"{product_image_prefix(product_id)}{uuid.uuid4().hex}.{ext}"
+    try:
+        client.put_object(
+            bucket,
+            object_key,
+            io.BytesIO(data),
+            length=len(data),
+            content_type=content_type,
+        )
+    except S3Error as exc:
+        raise HTTPException(status_code=503, detail="Could not save image to storage") from exc
     return object_key
 
 

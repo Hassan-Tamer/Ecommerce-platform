@@ -406,7 +406,7 @@ export default function DeskAnnouncementsSection() {
           </form>
         </section>
 
-        <section className="products__card">
+        <section className="products__card announcements-desk__catalog">
           <h3 className="announcements-desk__panel-title">All announcements</h3>
           {canReorder ? (
             <p className="announcements-desk__hint">Drag the handle to set the shop order.</p>

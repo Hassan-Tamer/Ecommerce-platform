@@ -24,7 +24,6 @@ from .schemas import (
     ShippingAddressIn,
 )
 
-LOW_STOCK_THRESHOLD = 5
 
 _ORDER_LOAD = (selectinload(Order.items),)
 
@@ -251,7 +250,7 @@ def admin_summary(db: Session) -> AdminSummaryOut:
 
     low_stock_filters = (
         Product.is_active.is_(True),
-        Product.stock_quantity <= LOW_STOCK_THRESHOLD,
+        Product.stock_quantity <= Product.stock_alert_at,
     )
     low_stock_count = (
         db.scalar(select(func.count()).select_from(Product).where(*low_stock_filters)) or 0
@@ -269,9 +268,14 @@ def admin_summary(db: Session) -> AdminSummaryOut:
         revenue_this_month=_money(Decimal(revenue_this_month)),
         product_count=product_count,
         low_stock_count=low_stock_count,
-        low_stock_threshold=LOW_STOCK_THRESHOLD,
+        low_stock_threshold=5,
         low_stock_items=[
-            AdminLowStockOut(id=row.id, name=row.name, stock_quantity=row.stock_quantity)
+            AdminLowStockOut(
+                id=row.id,
+                name=row.name,
+                stock_quantity=row.stock_quantity,
+                stock_alert_at=row.stock_alert_at,
+            )
             for row in low_stock_rows
         ],
     )

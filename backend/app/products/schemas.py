@@ -4,6 +4,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 def image_url_from_object_key(object_key: str) -> str:
+    from app.storage.minio_storage import media_url_from_stored
+
+    url = media_url_from_stored(object_key)
+    if url:
+        return url
     prefix = "external:"
     if object_key.startswith(prefix):
         return object_key[len(prefix) :]
@@ -33,6 +38,7 @@ class ProductOut(BaseModel):
     description: str | None
     price: Decimal = Field(json_schema_extra={"type": "number"})
     stock_quantity: int | None = None
+    stock_alert_at: int | None = None
     is_active: bool
     category: CategoryBrief
     images: list[ProductImageOut]
@@ -43,3 +49,8 @@ class ProductOut(BaseModel):
 class ProductListPage(BaseModel):
     items: list[ProductOut]
     next_cursor: str | None = None
+
+
+class ProductStockPatch(BaseModel):
+    add_stock: int = Field(default=0, ge=0)
+    stock_alert_at: int | None = Field(default=None, ge=0)

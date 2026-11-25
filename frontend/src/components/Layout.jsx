@@ -52,7 +52,7 @@ export default function Layout() {
                   <Icon name="orders" />
                   <span className="layout__label">Orders</span>
                 </NavLink>
-                {true || user?.role === 'admin' ? (
+                {user?.role === 'admin' ? (
                   <>
                     <NavLink className={navClass} to="/admin" end>
                       <Icon name="admin" />
@@ -61,10 +61,6 @@ export default function Layout() {
                     <NavLink className={navClass} to="/admin/products">
                       <Icon name="products" />
                       <span className="layout__label">Products</span>
-                    </NavLink>
-                    <NavLink className={navClass} to="/admin/inventory">
-                      <Icon name="inventory" />
-                      <span className="layout__label">Inventory</span>
                     </NavLink>
                   </>
                 ) : null}

@@ -73,8 +73,13 @@
 .admin__orders,
 .admin__stock {
   list-style: none;
-  margin: 0;
-  padding: 0;
+  max-height: min(22rem, 55vh);
+  margin: 0.35rem 0 0;
+  padding: 0 0.2rem 0 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .admin__orders {
@@ -172,31 +177,64 @@
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.admin__stock strong,
-.admin__stock span {
+.admin__stock-copy strong,
+.admin__stock-copy span {
   display: block;
 }
 
-.admin__stock span {
+.admin__stock-copy span {
   margin-top: 0.15rem;
   color: var(--muted);
   font-size: 0.9rem;
 }
 
-.admin__stock a {
+.admin__restock {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin__restock input {
+  width: 4.25rem;
+  padding: 0.4rem 0.55rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--field);
   color: var(--ink);
   font: inherit;
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  text-decoration: none;
 }
 
-.admin__stock a:hover {
-  background: var(--border);
-  text-decoration: none;
+.admin__restock input:focus {
+  outline: 2px solid var(--counter);
+  outline-offset: 2px;
+}
+
+.admin__restock button {
+  border: 0;
+  border-radius: 999px;
+  background: var(--counter);
+  color: var(--counter-ink);
+  font: inherit;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+
+.admin__restock button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.admin__restock button:disabled,
+.admin__restock input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin__stock-error {
+  margin-top: 0.25rem;
+  color: var(--danger);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .admin__empty {
@@ -240,5 +278,11 @@
 
   .admin__total {
     grid-column: 1;
+  }
+
+  .admin__stock li {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+    gap: 0.55rem;
   }
 }

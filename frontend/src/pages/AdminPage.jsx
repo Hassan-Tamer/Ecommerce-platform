@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import DeskAnnouncementsSection from '../features/admin/DeskAnnouncementsSection'
 import DeskCouponsSection from '../features/admin/DeskCouponsSection'
+import * as adminProductsApi from '../features/admin/adminProductsApi'
 import { formatPrice } from '../features/catalog/api/productsApi'
 import * as adminOrdersApi from '../features/orders/api/adminOrdersApi'
 import { adminDeskStatusLabel, adminStatusClass } from '../features/orders/orderUi'
@@ -16,6 +17,9 @@ export default function AdminPage() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState(null)
+  const [addAmounts, setAddAmounts] = useState({})
+  const [savingId, setSavingId] = useState(null)
+  const [stockError, setStockError] = useState(null)
 
   useEffect(() => {
     if (!ready || !isAdmin) return undefined
@@ -77,6 +81,37 @@ export default function AdminPage() {
   const lowStock = summary?.low_stock_items ?? []
   const alertAt = summary?.low_stock_threshold ?? 5
 
+  function updateAddAmount(productId, value) {
+    setAddAmounts((current) => ({ ...current, [productId]: value }))
+    if (stockError?.id === productId) setStockError(null)
+  }
+
+  async function restock(item) {
+    const raw = String(addAmounts[item.id] ?? '').trim()
+    const amount = Number(raw)
+    if (!raw || !Number.isInteger(amount) || amount < 1) {
+      setStockError({ id: item.id, message: 'Enter how many to add.' })
+      return
+    }
+
+    setSavingId(item.id)
+    setStockError(null)
+    try {
+      await adminProductsApi.patchAdminProductStock(item.id, { addStock: amount })
+      setAddAmounts((current) => {
+        const next = { ...current }
+        delete next[item.id]
+        return next
+      })
+      const summaryData = await adminOrdersApi.getAdminSummary()
+      setSummary(summaryData)
+    } catch (err) {
+      setStockError({ id: item.id, message: err.message || 'Could not update stock.' })
+    } finally {
+      setSavingId(null)
+    }
+  }
+
   return (
     <article className="desk admin">
       <div className="admin__top">
@@ -89,9 +124,6 @@ export default function AdminPage() {
         <div className="admin__links">
           <Link className="btn btn--primary" to="/admin/products">
             Manage products
-          </Link>
-          <Link className="btn btn--ghost" to="/admin/inventory">
-            Inventory
           </Link>
         </div>
       </div>
@@ -148,13 +180,38 @@ export default function AdminPage() {
             <ul className="admin__stock">
               {lowStock.map((item) => (
                 <li key={item.id}>
-                  <div>
+                  <div className="admin__stock-copy">
                     <strong>{item.name}</strong>
                     <span>
-                      {item.stock_quantity} left · alert at {alertAt}
+                      {item.stock_quantity} left · alert at {item.stock_alert_at ?? alertAt}
                     </span>
+                    {stockError?.id === item.id ? (
+                      <p className="admin__stock-error" role="alert">
+                        {stockError.message}
+                      </p>
+                    ) : null}
                   </div>
-                  <Link to="/admin/inventory">Stock</Link>
+                  <form
+                    className="admin__restock"
+                    onSubmit={(event) => {
+                      event.preventDefault()
+                      restock(item)
+                    }}
+                  >
+                    <label>
+                      <span className="visually-hidden">Units to add for {item.name}</span>
+                      <input
+                        inputMode="numeric"
+                        value={addAmounts[item.id] ?? ''}
+                        placeholder="Add"
+                        onChange={(event) => updateAddAmount(item.id, event.target.value)}
+                        disabled={savingId === item.id}
+                      />
+                    </label>
+                    <button type="submit" disabled={savingId === item.id}>
+                      {savingId === item.id ? 'Adding…' : 'Add'}
+                    </button>
+                  </form>
                 </li>
               ))}
             </ul>

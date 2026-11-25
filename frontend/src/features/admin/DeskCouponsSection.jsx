@@ -422,7 +422,7 @@ export default function DeskCouponsSection() {
           </form>
         </section>
 
-        <section className="products__card">
+        <section className="products__card coupons-desk__catalog">
           <h3 className="coupons-desk__panel-title">All coupons</h3>
           {loadState === 'loading' ? (
             <p className="products__empty">Loading…</p>
