@@ -1,7 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { formatPrice } from '../features/catalog/api/productsApi'
+import * as ordersApi from '../features/orders/api/ordersApi'
+import {
+  ORDER_TRACK_STEPS,
+  formatShippingAddress,
+  orderPillClass,
+  orderShowsMap,
+  orderStatusLabel,
+  orderStepIndex,
+} from '../features/orders/orderUi'
 import './OrdersPage.css'
-
-const STEPS = ['Placed', 'Packing', 'Shipped', 'Out for delivery', 'Delivered']
 
 const ROADS = [
   'M0 70H640',
@@ -25,49 +34,8 @@ const BLOCKS = [
 
 const ROUTE = '90,250 230,250 230,160 370,160 370,70 510,70'
 
-const INITIAL_ORDERS = [
-  {
-    id: '1042',
-    status: 'Out for delivery',
-    address: '12 Market Street, Cairo',
-    items: [
-      { name: 'Cedar tea tin', quantity: 1 },
-      { name: 'Linen napkin set', quantity: 2 },
-      { name: 'Olive oil, 500ml', quantity: 1 },
-    ],
-  },
-  {
-    id: '1038',
-    status: 'Delivered',
-    address: '8 Nile Road, Cairo',
-    items: [
-      { name: 'Stoneware bowl', quantity: 1 },
-      { name: 'Wildflower honey', quantity: 1 },
-    ],
-  },
-  {
-    id: '1044',
-    status: 'Packing',
-    address: '4 Garden Lane, Cairo',
-    items: [
-      { name: 'Cotton hand towel', quantity: 2 },
-      { name: 'Olive soap trio', quantity: 1 },
-    ],
-  },
-]
-
-function showsMap(status) {
-  return status === 'Out for delivery' || status === 'Delivered'
-}
-
-function pillClass(status) {
-  if (status === 'Out for delivery') return 'orders__pill orders__pill--travel'
-  if (status === 'Delivered') return 'orders__pill orders__pill--done'
-  return 'orders__pill'
-}
-
 function OrderMap({ status }) {
-  const delivered = status === 'Delivered'
+  const delivered = status === 'delivered'
 
   return (
     <div className="orders-map">
@@ -102,7 +70,10 @@ function OrderMap({ status }) {
           <polyline className="orders-map__route" points={ROUTE} />
           <circle className="orders-map__depot" cx="90" cy="250" r="5" />
           <g className="orders-map__pin" transform="translate(510 70)">
-            <path className="orders-map__pin-body" d="M0 1.5c-3.2-7.2-13-11-13-23.2a13 13 0 0 1 26 0c0 12.2-9.8 16-13 23.2z" />
+            <path
+              className="orders-map__pin-body"
+              d="M0 1.5c-3.2-7.2-13-11-13-23.2a13 13 0 0 1 26 0c0 12.2-9.8 16-13 23.2z"
+            />
             <circle className="orders-map__pin-core" cy="-23.2" r="5" />
           </g>
         </svg>
@@ -111,7 +82,9 @@ function OrderMap({ status }) {
           <span className="orders-map__home-name">Home</span>
         </div>
         <span
-          className={delivered ? 'orders-map__courier orders-map__courier--done' : 'orders-map__courier orders-map__courier--live'}
+          className={
+            delivered ? 'orders-map__courier orders-map__courier--done' : 'orders-map__courier orders-map__courier--live'
+          }
         >
           {!delivered && <span className="orders-map__tag">Live</span>}
         </span>
@@ -120,34 +93,134 @@ function OrderMap({ status }) {
   )
 }
 
+function summaryAddress(summary, detailsById) {
+  const detail = detailsById[summary.id]
+  if (detail?.shipping_address) return formatShippingAddress(detail.shipping_address)
+  return ''
+}
+
 export default function OrdersPage() {
-  const [orders] = useState(INITIAL_ORDERS)
-  const [selectedId, setSelectedId] = useState('1042')
-  const selected = orders.find((order) => order.id === selectedId) ?? orders[0]
-  const currentIndex = STEPS.indexOf(selected.status)
+  const location = useLocation()
+  const [summaries, setSummaries] = useState([])
+  const [selectedId, setSelectedId] = useState(null)
+  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [detailsById, setDetailsById] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
+  const [detailError, setDetailError] = useState(null)
+  const [detailLoading, setDetailLoading] = useState(false)
 
-  return (
-    <article className="desk">
-      <h1>Orders</h1>
-      <p className="desk__lead">Sample orders, not from the server.</p>
+  useEffect(() => {
+    const controller = new AbortController()
+    setLoading(true)
+    setLoadError(null)
 
+    ordersApi
+      .listOrders({ signal: controller.signal })
+      .then((data) => {
+        const rows = data?.items ?? []
+        setSummaries(rows)
+        const highlight = location.state?.highlightOrderId
+        const firstId = rows[0]?.id ?? null
+        if (highlight && rows.some((row) => row.id === highlight)) {
+          setSelectedId(highlight)
+        } else if (firstId != null) {
+          setSelectedId(firstId)
+        } else {
+          setSelectedId(null)
+          setSelectedOrder(null)
+        }
+      })
+      .catch((err) => {
+        if (err.name === 'AbortError') return
+        setSummaries([])
+        setLoadError(err.message || 'Could not load orders.')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false)
+      })
+
+    return () => controller.abort()
+  }, [location.state?.highlightOrderId])
+
+  useEffect(() => {
+    if (selectedId == null) {
+      setSelectedOrder(null)
+      return undefined
+    }
+
+    const cached = detailsById[selectedId]
+    if (cached) {
+      setSelectedOrder(cached)
+      setDetailLoading(false)
+      setDetailError(null)
+      return undefined
+    }
+
+    const controller = new AbortController()
+    setDetailLoading(true)
+    setDetailError(null)
+
+    ordersApi
+      .getOrder(selectedId, { signal: controller.signal })
+      .then((order) => {
+        setDetailsById((current) => ({ ...current, [order.id]: order }))
+        setSelectedOrder(order)
+      })
+      .catch((err) => {
+        if (err.name === 'AbortError') return
+        setSelectedOrder(null)
+        setDetailError(err.message || 'Could not load order details.')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setDetailLoading(false)
+      })
+
+    return () => controller.abort()
+    // detailsById intentionally omitted: cache is checked per selectedId only
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- cache read on selectedId change
+  }, [selectedId])
+
+  const selectedSummary = useMemo(
+    () => summaries.find((row) => row.id === selectedId) ?? null,
+    [summaries, selectedId],
+  )
+
+  const status = selectedOrder?.status ?? selectedSummary?.status ?? 'pending'
+  const currentIndex = orderStepIndex(status)
+  const cancelled = status === 'cancelled'
+
+  let body
+  if (loading) {
+    body = <p className="desk__lead">Loading your orders…</p>
+  } else if (loadError) {
+    body = (
+      <p className="desk__lead desk__lead--error" role="alert">
+        {loadError}
+      </p>
+    )
+  } else if (summaries.length === 0) {
+    body = <p className="desk__lead">You have not placed any orders yet.</p>
+  } else {
+    body = (
       <div className="orders">
         <ul className="orders__list">
-          {orders.map((order) => {
-            const count = order.items.reduce((sum, item) => sum + item.quantity, 0)
+          {summaries.map((order) => {
+            const count = order.item_count ?? 0
+            const address = summaryAddress(order, detailsById)
             return (
               <li key={order.id}>
                 <button
                   type="button"
                   className="orders__pick"
-                  aria-pressed={order.id === selected.id}
+                  aria-pressed={order.id === selectedId}
                   aria-controls="order-detail"
                   onClick={() => setSelectedId(order.id)}
                 >
                   <span className="orders__id">#{order.id}</span>
-                  <span className={pillClass(order.status)}>{order.status}</span>
+                  <span className={orderPillClass(order.status)}>{orderStatusLabel(order.status)}</span>
                   <span className="orders__meta">
-                    {order.address}
+                    {address || formatPrice(Number(order.total))}
                     <span className="orders__count">
                       {count} {count === 1 ? 'item' : 'items'}
                     </span>
@@ -159,53 +232,83 @@ export default function OrdersPage() {
         </ul>
 
         <section className="orders__detail" id="order-detail" aria-live="polite">
-          <header className="orders__head">
-            <div>
-              <h2>Order #{selected.id}</h2>
-              <p className="orders__address">{selected.address}</p>
-            </div>
-            <span className={pillClass(selected.status)}>{selected.status}</span>
-          </header>
+          {detailLoading && !selectedOrder ? <p className="orders__loading">Loading order…</p> : null}
+          {detailError ? (
+            <p className="orders__error" role="alert">
+              {detailError}
+            </p>
+          ) : null}
+          {selectedOrder ? (
+            <>
+              <header className="orders__head">
+                <div>
+                  <h2>Order #{selectedOrder.id}</h2>
+                  <p className="orders__address">{formatShippingAddress(selectedOrder.shipping_address)}</p>
+                </div>
+                <span className={orderPillClass(selectedOrder.status)}>{orderStatusLabel(selectedOrder.status)}</span>
+              </header>
 
-          <h3>Items</h3>
-          <ul className="orders__items">
-            {selected.items.map((item) => (
-              <li key={item.name}>
-                <span>{item.name}</span>
-                <span className="orders__qty">× {item.quantity}</span>
-              </li>
-            ))}
-          </ul>
+              <h3>Items</h3>
+              <ul className="orders__items">
+                {selectedOrder.items.map((item) => (
+                  <li key={item.id}>
+                    <span>
+                      {item.product_name}
+                      <span className="orders__line-price">{formatPrice(Number(item.line_total))}</span>
+                    </span>
+                    <span className="orders__qty">× {item.quantity}</span>
+                  </li>
+                ))}
+              </ul>
 
-          <h3>Status</h3>
-          <ol className="orders-track">
-            {STEPS.map((step, index) => {
-              const isCurrent = index === currentIndex
-              const isDone = index < currentIndex || (isCurrent && selected.status === 'Delivered')
-              const className = [
-                'orders-track__step',
-                isDone ? 'orders-track__step--done' : '',
-                isCurrent ? 'orders-track__step--current' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')
+              <p className="orders__grand-total">
+                <span>Total</span>
+                <strong>{formatPrice(Number(selectedOrder.total))}</strong>
+              </p>
 
-              return (
-                <li key={step} className={className} aria-current={isCurrent ? 'step' : undefined}>
-                  <span className="orders-track__mark" aria-hidden="true" />
-                  <span className="orders-track__name">{step}</span>
-                </li>
-              )
-            })}
-          </ol>
+              <h3>Status</h3>
+              {cancelled ? (
+                <p className="orders__cancelled">This order was cancelled.</p>
+              ) : (
+                <ol className="orders-track">
+                  {ORDER_TRACK_STEPS.map((step, index) => {
+                    const isCurrent = index === currentIndex
+                    const isDone = index < currentIndex || (isCurrent && status === 'delivered')
+                    const className = [
+                      'orders-track__step',
+                      isDone ? 'orders-track__step--done' : '',
+                      isCurrent ? 'orders-track__step--current' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')
 
-          {showsMap(selected.status) ? (
-            <OrderMap key={selected.id} status={selected.status} />
-          ) : (
-            <p className="orders__map-note">The map appears once the order is out for delivery.</p>
-          )}
+                    return (
+                      <li key={step} className={className} aria-current={isCurrent ? 'step' : undefined}>
+                        <span className="orders-track__mark" aria-hidden="true" />
+                        <span className="orders-track__name">{step}</span>
+                      </li>
+                    )
+                  })}
+                </ol>
+              )}
+
+              {orderShowsMap(status) ? (
+                <OrderMap key={selectedOrder.id} status={status} />
+              ) : (
+                <p className="orders__map-note">The map appears once the order is out for delivery.</p>
+              )}
+            </>
+          ) : null}
         </section>
       </div>
+    )
+  }
+
+  return (
+    <article className="desk">
+      <h1>Orders</h1>
+      <p className="desk__lead">Orders you have placed in this shop.</p>
+      {body}
     </article>
   )
 }

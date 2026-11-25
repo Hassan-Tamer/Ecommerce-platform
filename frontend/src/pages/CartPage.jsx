@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { formatPrice } from '../features/catalog/api/productsApi'
 import * as cartApi from '../features/cart/api/cartApi'
+import { CHECKOUT_COUPON_KEY } from '../features/orders/orderUi'
 import { useCart } from '../features/cart/CartContext'
 import Button from '../components/Button'
 import Icon from '../components/icons'
@@ -22,6 +23,11 @@ export default function CartPage() {
   useEffect(() => {
     setPricing(null)
     setCouponError(null)
+    try {
+      sessionStorage.removeItem(CHECKOUT_COUPON_KEY)
+    } catch {
+      // ignore
+    }
   }, [items])
 
   async function onApplyCoupon(event) {
@@ -38,6 +44,11 @@ export default function CartPage() {
     try {
       const data = await cartApi.applyCartCoupon(code)
       setPricing(data)
+      try {
+        if (data?.coupon?.code) sessionStorage.setItem(CHECKOUT_COUPON_KEY, data.coupon.code)
+      } catch {
+        // ignore
+      }
     } catch (err) {
       setPricing(null)
       setCouponError(err.message || 'Coupon could not be applied.')

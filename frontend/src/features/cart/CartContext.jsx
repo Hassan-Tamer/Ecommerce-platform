@@ -163,11 +163,24 @@ export function CartProvider({ children }) {
     [removeItem],
   )
 
+  const reloadCart = useCallback(async () => {
+    if (!isAuthenticated) {
+      setItems([])
+      return
+    }
+    setLoading(true)
+    try {
+      await replaceItemsFromServer(setItems)
+    } finally {
+      setLoading(false)
+    }
+  }, [isAuthenticated])
+
   const count = items.reduce((sum, item) => sum + item.quantity, 0)
 
   const value = useMemo(
-    () => ({ items, count, loading, addItem, setQuantity, removeItem }),
-    [items, count, loading, addItem, setQuantity, removeItem],
+    () => ({ items, count, loading, addItem, setQuantity, removeItem, reloadCart }),
+    [items, count, loading, addItem, setQuantity, removeItem, reloadCart],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

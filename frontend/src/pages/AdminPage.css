@@ -23,7 +23,7 @@
 .admin__stats {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   gap: 0.85rem;
   margin: 1.5rem 0 0;
   padding: 0;
@@ -75,6 +75,16 @@
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.admin__orders {
+  max-height: min(22rem, 55vh);
+  margin-top: 0.35rem;
+  padding-right: 0.2rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .admin__orders button,
@@ -133,9 +143,29 @@
   color: var(--counter-ink);
 }
 
-.admin__status--packing {
+.admin__status--packing,
+.admin__status--pending {
   background: #f3ead6;
   color: #6a4e16;
+}
+
+.admin__status--shipped {
+  background: var(--counter);
+  color: var(--counter-ink);
+}
+
+.admin__status--delivered {
+  background: var(--field);
+  color: var(--counter);
+}
+
+.admin__status--cancelled {
+  background: var(--field);
+  color: var(--muted);
+}
+
+.admin__orders button:disabled {
+  cursor: default;
 }
 
 .admin__stock li {

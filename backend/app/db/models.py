@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Any, Optional
 
 from sqlalchemy import (
     Boolean,
@@ -16,6 +16,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.enums import UserRole
@@ -57,6 +58,7 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    orders: Mapped[list["Order"]] = relationship(back_populates="user")
 
 
 class RefreshToken(Base):
@@ -239,6 +241,83 @@ class Review(Base):
 
     user: Mapped[User] = relationship(back_populates="reviews")
     product: Mapped[Product] = relationship(back_populates="reviews")
+
+
+class Order(Base):
+    __tablename__ = "orders"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending','paid','shipped','delivered','cancelled')",
+            name="ck_order_status",
+        ),
+        CheckConstraint("total >= 0", name="ck_order_total_nonneg"),
+        UniqueConstraint("user_id", "idempotency_key", name="uq_order_idempotency"),
+        Index("ix_orders_user_created", "user_id", "created_at"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, server_default="pending")
+    subtotal: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    discount_amount: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2),
+        nullable=False,
+        server_default="0",
+    )
+    shipping_amount: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2),
+        nullable=False,
+        server_default="0",
+    )
+    total: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    coupon_code: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    shipping_address: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    idempotency_key: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    user: Mapped[User] = relationship(back_populates="orders")
+    items: Mapped[list["OrderItem"]] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan",
+    )
+
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+    __table_args__ = (
+        CheckConstraint("quantity > 0", name="ck_orderitem_qty_pos"),
+        CheckConstraint("unit_price >= 0", name="ck_orderitem_price_nonneg"),
+        Index("ix_order_items_order", "order_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    product_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("products.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    product_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    order: Mapped[Order] = relationship(back_populates="items")
+    product: Mapped[Optional[Product]] = relationship()
 
 
 class Coupon(Base):

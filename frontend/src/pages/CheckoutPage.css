@@ -31,10 +31,6 @@
   gap: 1rem;
 }
 
-.checkout__card-fields {
-  margin-top: 1rem;
-}
-
 .checkout__field {
   display: flex;
   flex-direction: column;
@@ -55,51 +51,8 @@
   font-weight: 400;
 }
 
-.checkout__split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.checkout__choices {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-}
-
-.checkout__choice {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.75rem;
-  padding: 0.65rem 0.9rem;
-  border-radius: 999px;
-  background: var(--field);
-  color: var(--ink);
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-}
-
-.checkout__choice.is-selected {
-  background: var(--counter);
-  color: var(--counter-ink);
-}
-
-.checkout__choice input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-
 .checkout__note {
-  margin-top: 1rem;
+  margin: 0;
   color: var(--muted);
 }
 
@@ -153,6 +106,35 @@
   color: var(--ink);
 }
 
+.checkout__totals {
+  margin: 0;
+  padding: 0;
+}
+
+.checkout__total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.checkout__total-row dt,
+.checkout__total-row dd {
+  margin: 0;
+}
+
+.checkout__total-row--discount dd {
+  color: var(--accent);
+}
+
+.checkout__error {
+  margin: 0 0 0.75rem;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
 .checkout__total {
   display: flex;
   align-items: baseline;
@@ -174,9 +156,7 @@
 }
 
 @media (max-width: 800px) {
-  .checkout__grid,
-  .checkout__choices,
-  .checkout__split {
+  .checkout__grid {
     grid-template-columns: 1fr;
   }
 }

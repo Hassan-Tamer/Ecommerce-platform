@@ -16,6 +16,8 @@ from app.coupons import router as coupons_router
 from app.reviews import admin_router as reviews_admin_router
 from app.reviews import router as reviews_router
 from app.wishlist import router as wishlist_router
+from app.orders import admin_router as orders_admin_router
+from app.orders import router as orders_router
 
 
 def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
@@ -51,6 +53,8 @@ app.include_router(coupons_router)
 app.include_router(coupons_admin_router)
 app.include_router(reviews_router)
 app.include_router(reviews_admin_router)
+app.include_router(orders_router)
+app.include_router(orders_admin_router)
 
 @app.get("/health")
 def health():

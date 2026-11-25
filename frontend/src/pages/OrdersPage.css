@@ -82,6 +82,11 @@
   color: var(--counter);
 }
 
+.orders__pill--cancelled {
+  background: var(--field);
+  color: var(--muted);
+}
+
 .orders__pick[aria-pressed='true'] .orders__pill {
   background: var(--counter-ink);
   color: var(--counter);
@@ -152,6 +157,40 @@
   gap: 1rem;
   padding: 0.55rem 0;
   border-bottom: 1px solid var(--border);
+}
+
+.orders__line-price {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.orders__grand-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 1.25rem;
+  font-size: 1rem;
+}
+
+.orders__grand-total strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.orders__cancelled,
+.orders__loading,
+.orders__error {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+.orders__error {
+  color: var(--accent);
 }
 
 .orders__qty {
