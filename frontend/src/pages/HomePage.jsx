@@ -220,6 +220,10 @@ export default function HomePage() {
             <label className="visually-hidden" htmlFor="catalog-search">
               Search products
             </label>
+            <svg className="counter__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="M16 16.5 20 20.5" />
+            </svg>
             <input
               id="catalog-search"
               type="search"
@@ -360,26 +364,28 @@ export default function HomePage() {
                           ) : (
                             <span className="product__placeholder">No image</span>
                           )}
+                          {product.stock_quantity === 0 ? (
+                            <span className="product__badge">Out of stock</span>
+                          ) : null}
                         </div>
-                        <div className="product__row">
+                        <div className="product__body">
+                          <p className="product__meta">
+                            {product.category?.name ? categoryLabel(product.category.name) : '\u00a0'}
+                          </p>
                           <h2 className="product__name">{product.name}</h2>
                           <p className="product__price">{formatPrice(product.price)}</p>
+                          {reviewCount > 0 ? (
+                            <p className="product__rating">
+                              <StarRating
+                                value={reviewAverage}
+                                caption={`${reviewAverage.toFixed(1)} · ${reviewCount}`}
+                                size="sm"
+                              />
+                            </p>
+                          ) : (
+                            <p className="product__rating" aria-hidden="true" />
+                          )}
                         </div>
-                        <p className="product__meta">
-                          {product.category?.name ? categoryLabel(product.category.name) : ''}
-                        </p>
-                        {reviewCount > 0 ? (
-                          <p className="product__rating">
-                            <StarRating
-                              value={reviewAverage}
-                              caption={`${reviewAverage.toFixed(1)} · ${reviewCount}`}
-                              size="sm"
-                            />
-                          </p>
-                        ) : null}
-                        {product.stock_quantity === 0 && (
-                          <p className="product__stock">Out of stock</p>
-                        )}
                       </Link>
                       <div className="product__actions">
                         <SaveButton product={product} compact />
@@ -394,7 +400,7 @@ export default function HomePage() {
               <div className="catalog__more">
                 <button
                   type="button"
-                  className="filters__clear"
+                  className="catalog__more-btn"
                   onClick={loadMore}
                   disabled={loadingMore}
                 >

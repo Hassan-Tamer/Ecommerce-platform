@@ -1,6 +1,6 @@
 .announcements__viewport {
   overflow: hidden;
-  max-width: var(--max-width);
+  width: min(100%, 86rem);
   margin: 0 auto;
   animation: announcements-reveal 480ms ease both;
 }
@@ -22,7 +22,7 @@
   grid-template-columns: 1fr;
   gap: 0.75rem;
   margin: 0;
-  padding: 1.25rem 1.25rem 1.15rem;
+  padding: 1.25rem 1.5rem 1.15rem;
   list-style: none;
 }
 
@@ -58,15 +58,17 @@
 }
 
 @media (max-width: 640px) {
-  .announcements__list {
+  .announcements__list,
+  .announcements__status,
+  .announcements__dots {
     padding-inline: 1rem;
   }
 }
 
 .announcements__status {
-  max-width: var(--max-width);
+  width: min(100%, 86rem);
   margin: 0 auto;
-  padding: 1.25rem 1.25rem 0;
+  padding: 1.25rem 1.5rem 0;
   color: var(--muted);
   font-size: 0.95rem;
 }
@@ -75,9 +77,9 @@
   display: flex;
   justify-content: center;
   gap: 0.2rem;
-  max-width: var(--max-width);
+  width: min(100%, 86rem);
   margin: 0.15rem auto 0;
-  padding: 0 1.25rem 0.15rem;
+  padding: 0 1.5rem 0.15rem;
 }
 
 .announcements__dot {
