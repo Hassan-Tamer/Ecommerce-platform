@@ -140,6 +140,28 @@
   background: var(--border);
 }
 
+.account__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--muted);
+  text-align: left;
+}
+
+.account__notice {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.account__notice--error {
+  color: var(--danger, #b42318);
+}
+
+.account__notice--success {
+  color: var(--success, #027a48);
+}
+
 .account__file input {
   position: absolute;
   width: 1px;

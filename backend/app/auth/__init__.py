@@ -5,6 +5,7 @@ from .schemas import (
     LoginRequest,
     LoginResponse,
     LogoutResponse,
+    MeUpdate,
     RegisterRequest,
     UserOut,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "LoginRequest",
     "LoginResponse",
     "LogoutResponse",
+    "MeUpdate",
     "RegisterRequest",
     "TokenType",
     "UserOut",

@@ -17,7 +17,7 @@ export default function Layout() {
   const { isAuthenticated, ready, user, logout } = useAuth()
   const { count } = useCart()
   const { count: saved } = useWishlist()
-  const avatar = useAvatarPreview() || user?.avatar_url || null
+  const avatar = useAvatarPreview() || user?.photo || user?.avatar_url || null
   const name = user?.name ?? 'Account'
 
   return (

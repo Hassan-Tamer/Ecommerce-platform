@@ -118,7 +118,8 @@ async function send(path, options, retried) {
   }
 
   const headers = { ...options.headers }
-  if (options.body) headers['Content-Type'] = 'application/json'
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
+  if (options.body && !isFormData) headers['Content-Type'] = 'application/json'
   if (accessToken && pathname !== '/auth/refresh') {
     headers.Authorization = `Bearer ${accessToken}`
   }
@@ -164,4 +165,24 @@ export function login({ email, password }) {
 
 export function logout() {
   return apiRequest('/auth/logout', { method: 'POST' })
+}
+
+export function getMe() {
+  return apiRequest('/auth/me')
+}
+
+export function patchMe(body) {
+  return apiRequest('/auth/me', {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+}
+
+export function uploadProfilePhoto(file) {
+  const form = new FormData()
+  form.append('file', file)
+  return apiRequest('/auth/me/photo', {
+    method: 'POST',
+    body: form,
+  })
 }

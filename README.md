@@ -54,14 +54,10 @@ Frontend account, cart, checkout, reviews, coupons, assistant, and admin flows a
 
 ### Account
 
-User profile: `phone`, `avatar_url` (or MinIO object key) [ ]
-Address table: `street`, `city`, `region`, `postal_code` (one per user) [ ]
-`GET /auth/me` — `role`, phone, address, avatar [ ]
-`PATCH /auth/me` — name, phone [ ]
-`PUT /auth/me/address` [ ]
-`POST /auth/me/photo` (MinIO, public URL) [ ]
-
-add email in profile [ ]
+User profile columns on `users`: `phone`, `photo` (MinIO object key), `street`, `city`, `apartment_number`, `floor` [x]
+`GET /auth/me` — name, email, phone, public photo URL, street, city, apartment number, floor [x]
+`PATCH /auth/me` — name, phone, address fields; email rejected; photo via upload only [x]
+`POST /auth/me/photo` — multipart upload to MinIO, object key in DB [x]
 
 ### Cart
 

@@ -84,6 +84,30 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
+  const refreshUser = useCallback(async () => {
+    const data = await authApi.getMe()
+    acceptUser(data)
+    return data
+  }, [acceptUser])
+
+  const updateProfile = useCallback(
+    async (patch) => {
+      const data = await authApi.patchMe(patch)
+      acceptUser(data)
+      return data
+    },
+    [acceptUser],
+  )
+
+  const uploadProfilePhoto = useCallback(
+    async (file) => {
+      const data = await authApi.uploadProfilePhoto(file)
+      acceptUser(data)
+      return data
+    },
+    [acceptUser],
+  )
+
   const value = useMemo(
     () => ({
       user,
@@ -94,8 +118,11 @@ export function AuthProvider({ children }) {
       register,
       login,
       logout,
+      refreshUser,
+      updateProfile,
+      uploadProfilePhoto,
     }),
-    [user, loading, ready, error, isAuthenticated, register, login, logout],
+    [user, loading, ready, error, isAuthenticated, register, login, logout, refreshUser, updateProfile, uploadProfilePhoto],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

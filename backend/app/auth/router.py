@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Request, Response, UploadFile
 from sqlalchemy.orm import Session
 
 from . import service
@@ -8,6 +8,7 @@ from .schemas import (
     LoginRequest,
     LoginResponse,
     LogoutResponse,
+    MeUpdate,
     RegisterRequest,
     UserOut,
 )
@@ -88,3 +89,27 @@ def me(
     request: Request, response: Response, current_user: User = Depends(get_current_user)
 ):
     return service.get_me(current_user)
+
+
+@router.patch("/me", response_model=UserOut)
+@limiter.limit("30/minute")
+def update_me(
+    request: Request,
+    response: Response,
+    body: MeUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return service.update_me(db, user=current_user, data=body)
+
+
+@router.post("/me/photo", response_model=UserOut)
+@limiter.limit("10/minute")
+def upload_me_photo(
+    request: Request,
+    response: Response,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return service.upload_user_photo(db, user=current_user, upload=file)

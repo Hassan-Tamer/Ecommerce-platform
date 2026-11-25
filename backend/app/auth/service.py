@@ -1,6 +1,6 @@
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -11,8 +11,10 @@ from .refresh_tokens import (
     revoke_refresh_token_row,
     store_refresh_token,
 )
-from .schemas import LoginResponse, UserOut
+from .schemas import LoginResponse, MeUpdate, UserOut
 from app.db.models import User
+from app.storage import delete_object, media_url_from_stored, upload_user_avatar
+from app.storage.minio_storage import content_type_from_filename
 
 _password_hasher = PasswordHasher()
 
@@ -30,7 +32,17 @@ def verify_password(stored_hash: str, plain: str) -> bool:
 
 
 def _user_out(user: User) -> UserOut:
-    return UserOut(id=user.id, name=user.name, email=user.email)
+    return UserOut(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        phone=user.phone,
+        photo=media_url_from_stored(user.photo),
+        street=user.street,
+        city=user.city,
+        apartment_number=user.apartment_number,
+        floor=user.floor,
+    )
 
 
 def _issue_tokens(db: Session, user: User) -> tuple[LoginResponse, str]:
@@ -108,6 +120,65 @@ def refresh_user(db: Session, *, refresh_token: str) -> tuple[LoginResponse, str
 
 
 def get_me(user: User) -> UserOut:
+    return _user_out(user)
+
+
+_PROFILE_FIELDS = ("phone", "street", "city", "apartment_number", "floor")
+
+
+def update_me(db: Session, *, user: User, data: MeUpdate) -> UserOut:
+    changes = data.model_dump(exclude_unset=True)
+
+    if "name" in changes:
+        name = changes["name"]
+        if not name:
+            raise HTTPException(status_code=422, detail="Name is required")
+        user.name = name
+
+    for field in _PROFILE_FIELDS:
+        if field in changes:
+            setattr(user, field, changes[field])
+
+    db.commit()
+    db.refresh(user)
+    return _user_out(user)
+
+
+def _drop_stored_avatar(photo: str | None) -> None:
+    if not photo or photo.startswith(("external:", "http://", "https://")):
+        return
+    delete_object(photo)
+
+
+def upload_user_photo(db: Session, *, user: User, upload: UploadFile) -> UserOut:
+    content_type = (upload.content_type or "").split(";", 1)[0].strip().lower()
+    filename = upload.filename
+    if upload.file is None:
+        raise HTTPException(status_code=400, detail="Photo file is required")
+
+    if content_type not in {"image/jpeg", "image/png", "image/webp", "image/gif"}:
+        guessed = content_type_from_filename(filename)
+        if guessed:
+            content_type = guessed
+        else:
+            raise HTTPException(status_code=400, detail="Photo must be JPEG, PNG, WebP, or GIF")
+
+    data = upload.file.read()
+    object_key = upload_user_avatar(
+        user_id=user.id,
+        data=data,
+        content_type=content_type,
+        filename=filename,
+    )
+
+    previous = user.photo
+    user.photo = object_key
+    db.commit()
+    db.refresh(user)
+
+    if previous and previous != object_key:
+        _drop_stored_avatar(previous)
+
     return _user_out(user)
 
 

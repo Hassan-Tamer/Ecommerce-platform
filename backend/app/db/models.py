@@ -34,6 +34,12 @@ class User(Base):
         nullable=False,
         server_default=UserRole.CUSTOMER.value,
     )
+    phone: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    photo: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    street: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    city: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    apartment_number: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    floor: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
 
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
         back_populates="user",
