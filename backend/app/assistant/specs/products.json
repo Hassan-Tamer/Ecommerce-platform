@@ -5,11 +5,7 @@
     "version": "1.0.0",
     "description": "Read-only catalog endpoints for product discovery."
   },
-  "servers": [
-    {
-      "url": "http://127.0.0.1:8000"
-    }
-  ],
+  "servers": [{ "url": "http://internal" }],
   "paths": {
     "/products/categories": {
       "get": {

@@ -26,7 +26,7 @@ function AssistantMarkdown({ text }) {
 }
 
 const WELCOME =
-  'Tell me what you are looking for, or ask about an order. (I can chat for now — catalog and order lookup come later.)'
+  'Tell me what you are looking for, ask about an order, or say if you want something on your wishlist or in your cart.'
 
 export default function Assistant() {
   const [open, setOpen] = useState(false)

@@ -29,7 +29,7 @@ def _use_asgi_transport() -> bool:
 def _api_base_url() -> str:
     if _use_asgi_transport():
         return _INTERNAL_BASE_URL
-    return os.getenv("ASSISTANT_API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+    return os.getenv("ASSISTANT_API_BASE_URL", "http://127.0.0.1:3000").rstrip("/")
 
 
 def _asgi_httpx_factory() -> HttpxClientFactory:

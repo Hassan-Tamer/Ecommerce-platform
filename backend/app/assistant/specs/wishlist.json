@@ -1,0 +1,57 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Wishlist (assistant)",
+    "version": "1.0.0",
+    "description": "Signed-in shopper wishlist. Requires Authorization."
+  },
+  "servers": [{ "url": "http://internal" }],
+  "paths": {
+    "/wishlist": {
+      "get": {
+        "operationId": "get_wishlist",
+        "summary": "List products saved on the signed-in customer's wishlist.",
+        "responses": {
+          "200": { "description": "Wishlist items" },
+          "401": { "description": "Not signed in" }
+        }
+      }
+    },
+    "/wishlist/{product_id}": {
+      "put": {
+        "operationId": "add_to_wishlist",
+        "summary": "Save a product to the wishlist by numeric product_id.",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Product saved" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Product not found" }
+        }
+      },
+      "delete": {
+        "operationId": "remove_from_wishlist",
+        "summary": "Remove a product from the wishlist by numeric product_id.",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Removed" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Not on wishlist" }
+        }
+      }
+    }
+  }
+}

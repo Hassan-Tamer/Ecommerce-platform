@@ -1,0 +1,71 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Cart (assistant)",
+    "version": "1.0.0",
+    "description": "Signed-in shopper cart. Requires Authorization."
+  },
+  "servers": [{ "url": "http://internal" }],
+  "paths": {
+    "/cart": {
+      "get": {
+        "operationId": "get_cart",
+        "summary": "Get the signed-in customer's cart with line items and subtotal.",
+        "responses": {
+          "200": { "description": "Cart" },
+          "401": { "description": "Not signed in" }
+        }
+      }
+    },
+    "/cart/items": {
+      "post": {
+        "operationId": "add_to_cart",
+        "summary": "Add a product to the cart (or increase quantity if already present).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["product_id"],
+                "properties": {
+                  "product_id": { "type": "integer", "minimum": 1 },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 1,
+                    "description": "Number of units to add"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Line added or updated" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Product not found" }
+        }
+      }
+    },
+    "/cart/items/{product_id}": {
+      "delete": {
+        "operationId": "remove_from_cart",
+        "summary": "Remove one product line from the cart by numeric product_id.",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Removed" },
+          "401": { "description": "Not signed in" },
+          "404": { "description": "Not in cart" }
+        }
+      }
+    }
+  }
+}

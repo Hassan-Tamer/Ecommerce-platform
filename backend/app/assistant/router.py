@@ -21,9 +21,8 @@ async def post_assistant_message(
     current_user: User = Depends(get_current_user),
     authorization: Annotated[str | None, Header()] = None,
 ) -> AssistantMessageOut:
-    reply = await service.reply_for_user(
+    return await service.reply_for_user(
         current_user,
         body.message,
         authorization=authorization,
     )
-    return AssistantMessageOut(reply=reply)

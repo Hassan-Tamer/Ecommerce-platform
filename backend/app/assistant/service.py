@@ -11,6 +11,7 @@ from google.genai import types
 from app.db.models import User
 
 from .agent import ASSISTANT_APP_NAME, root_agent
+from .schemas import AssistantMessageOut
 from .tools import AUTH_HEADER_STATE_KEY
 
 logger = logging.getLogger(__name__)
@@ -63,7 +64,7 @@ async def reply_for_user(
     message: str,
     *,
     authorization: str | None = None,
-) -> str:
+) -> AssistantMessageOut:
     text = message.strip()
     if not text:
         raise HTTPException(status_code=422, detail="Message cannot be empty")
@@ -98,4 +99,4 @@ async def reply_for_user(
     if not reply:
         raise HTTPException(status_code=502, detail="Assistant returned an empty reply")
 
-    return reply
+    return AssistantMessageOut(reply=reply)
