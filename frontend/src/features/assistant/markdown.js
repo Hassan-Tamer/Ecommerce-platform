@@ -5,7 +5,13 @@ const MONTH =
 
 export function prepareAssistantMarkdown(text) {
   return text
+    .replace(/(^|[^!])\[[^\]]*\]\([^)]*\)/g, '$1')
+    .replace(/\/products\/[A-Za-z0-9_-]+/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .replace(/[ \t]+([-*])[ \t]+\*\*/g, '\n$1 **')
     .replace(/[ \t]+(\d+)\.[ \t]+\*\*/g, '\n$1. **')
     .replace(new RegExp(`(\\b(?:${MONTH}) \\d{1,2}) +(?=[A-Z])`, 'g'), '$1\n\n')
+    .trim()
 }

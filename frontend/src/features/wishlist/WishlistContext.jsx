@@ -100,9 +100,18 @@ export function WishlistProvider({ children }) {
 
   const hasItem = useCallback((id) => items.some((item) => item.id === id), [items])
 
+  const reload = useCallback(async () => {
+    if (!isAuthenticated) {
+      setItems([])
+      return
+    }
+    const data = await wishlistApi.listWishlist()
+    setItems((data?.items ?? []).map(itemFromProduct))
+  }, [isAuthenticated])
+
   const value = useMemo(
-    () => ({ items, count: items.length, loading, addItem, removeItem, toggleItem, hasItem }),
-    [items, loading, addItem, removeItem, toggleItem, hasItem],
+    () => ({ items, count: items.length, loading, addItem, removeItem, toggleItem, hasItem, reload }),
+    [items, loading, addItem, removeItem, toggleItem, hasItem, reload],
   )
 
   return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>

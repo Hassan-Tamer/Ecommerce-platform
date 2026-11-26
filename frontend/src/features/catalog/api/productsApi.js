@@ -34,3 +34,7 @@ export function listProducts(filters = {}, { signal } = {}) {
 export function getProductBySlug(slug, { signal } = {}) {
   return request(`/products/slug/${encodeURIComponent(slug)}`, { signal })
 }
+
+export function getProduct(productId, { signal } = {}) {
+  return request(`/products/${productId}`, { signal })
+}

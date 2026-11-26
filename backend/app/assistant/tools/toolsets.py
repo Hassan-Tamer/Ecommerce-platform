@@ -6,8 +6,9 @@ _CATALOG_OPS = (
     "search_products",
     "get_product_by_slug",
 )
-_WISHLIST_OPS = ("get_wishlist", "add_to_wishlist", "remove_from_wishlist")
-_CART_OPS = ("get_cart", "add_to_cart", "remove_from_cart")
+# Writes are confirm buttons on the reply. The storefront performs them.
+_WISHLIST_OPS = ("get_wishlist",)
+_CART_OPS = ("get_cart",)
 
 
 def orders_toolset():

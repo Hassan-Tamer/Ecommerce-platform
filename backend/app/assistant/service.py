@@ -11,7 +11,7 @@ from google.genai import types
 from app.db.models import User
 
 from .agent import ASSISTANT_APP_NAME, root_agent
-from .schemas import AssistantMessageOut
+from .schemas import AssistantMessageOut, parse_assistant_output
 from .tools import AUTH_HEADER_STATE_KEY
 
 logger = logging.getLogger(__name__)
@@ -53,10 +53,14 @@ async def _ensure_session(
 def _text_from_event(event) -> str | None:
     if not event.is_final_response() or not event.content or not event.content.parts:
         return None
+    chunks: list[str] = []
     for part in event.content.parts:
-        if getattr(part, "text", None):
-            return part.text.strip()
-    return None
+        if getattr(part, "thought", False):
+            continue
+        text = getattr(part, "text", None)
+        if text and text.strip():
+            chunks.append(text.strip())
+    return "\n".join(chunks) if chunks else None
 
 
 async def reply_for_user(
@@ -99,4 +103,8 @@ async def reply_for_user(
     if not reply:
         raise HTTPException(status_code=502, detail="Assistant returned an empty reply")
 
-    return AssistantMessageOut(reply=reply)
+    try:
+        return parse_assistant_output(reply)
+    except ValueError as exc:
+        logger.exception("Assistant output was not usable for user %s", user.id)
+        raise HTTPException(status_code=502, detail="Assistant returned an empty reply") from exc
