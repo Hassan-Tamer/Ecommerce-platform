@@ -17,15 +17,17 @@ Observability [ ]
 ## AI & LLM
 
 Shop assistant UI (frontend mock) [x]  
-`POST /assistant/messages` — shopper message in, reply out [ ]  
+`POST /assistant/messages` — shopper message in, reply out [x]  
 Assistant scoped to catalog + signed-in user's orders [ ]  
-LLM provider wiring (model, API keys, timeouts) [ ]  
+LLM provider wiring (model, API keys, timeouts) [x]  
 Optional prompt / tool layer for product lookup and order status [ ]  
 Optional `assistant_messages` persistence (`user_id`, `role`, `body`, `created_at`) [ ]  
 Chatbot (broader than shop assistant) [ ]  
 Recommendation [ ]  
 Review summarizer [ ]  
 Semantic search [ ]
+
+mcp [ ]
 
 ### Announcements
 

@@ -1,3 +1,5 @@
+import app.env  # noqa: F401 — load backend/.env before other app imports
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -18,6 +20,7 @@ from app.reviews import router as reviews_router
 from app.wishlist import router as wishlist_router
 from app.orders import admin_router as orders_admin_router
 from app.orders import router as orders_router
+from app.assistant import router as assistant_router
 
 
 def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
@@ -55,6 +58,7 @@ app.include_router(reviews_router)
 app.include_router(reviews_admin_router)
 app.include_router(orders_router)
 app.include_router(orders_admin_router)
+app.include_router(assistant_router)
 
 @app.get("/health")
 def health():

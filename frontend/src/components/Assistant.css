@@ -215,6 +215,9 @@
 }
 
 .assistant__thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
   flex: 1;
   min-height: 0;
   overflow: auto;
@@ -228,6 +231,38 @@
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
+}
+
+.assistant__message--user {
+  flex-direction: row-reverse;
+  align-self: flex-end;
+}
+
+.assistant__message--user .assistant__bubble {
+  border-radius: 1.15rem 0.35rem 1.15rem 1.15rem;
+  background: linear-gradient(165deg, #e8f3f0, #f6faf9);
+  max-width: 24ch;
+}
+
+.assistant__bubble--typing {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.assistant__error {
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.65rem;
+  background: #fef2f2;
+  color: #9f1239;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.assistant__send:disabled,
+.assistant__composer textarea:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .assistant__bubble {
