@@ -1,7 +1,29 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import Markdown from 'react-markdown'
+import remarkBreaks from 'remark-breaks'
 import { sendAssistantMessage } from '../features/assistant/assistantApi'
+import { prepareAssistantMarkdown } from '../features/assistant/markdown'
 import Icon from './icons'
 import './Assistant.css'
+
+function MarkdownLink({ href, children }) {
+  const external = /^https?:/i.test(href || '')
+  return (
+    <a href={href} {...(external ? { target: '_blank', rel: 'noreferrer noopener' } : {})}>
+      {children}
+    </a>
+  )
+}
+
+function AssistantMarkdown({ text }) {
+  return (
+    <div className="assistant__bubble assistant__markdown">
+      <Markdown remarkPlugins={[remarkBreaks]} components={{ a: MarkdownLink }}>
+        {prepareAssistantMarkdown(text)}
+      </Markdown>
+    </div>
+  )
+}
 
 const WELCOME =
   'Tell me what you are looking for, or ask about an order. (I can chat for now — catalog and order lookup come later.)'
@@ -130,7 +152,11 @@ export default function Assistant() {
                   <Icon name="chat" />
                 </span>
               ) : null}
-              <p className="assistant__bubble">{entry.text}</p>
+              {entry.role === 'assistant' ? (
+                <AssistantMarkdown text={entry.text} />
+              ) : (
+                <p className="assistant__bubble">{entry.text}</p>
+              )}
             </div>
           ))}
           {sending ? (

@@ -11,6 +11,7 @@ from google.genai import types
 from app.db.models import User
 
 from .agent import ASSISTANT_APP_NAME, root_agent
+from .tools import AUTH_HEADER_STATE_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,12 @@ def _text_from_event(event) -> str | None:
     return None
 
 
-async def reply_for_user(user: User, message: str) -> str:
+async def reply_for_user(
+    user: User,
+    message: str,
+    *,
+    authorization: str | None = None,
+) -> str:
     text = message.strip()
     if not text:
         raise HTTPException(status_code=422, detail="Message cannot be empty")
@@ -70,12 +76,17 @@ async def reply_for_user(user: User, message: str) -> str:
 
     content = types.Content(role="user", parts=[types.Part(text=text)])
 
+    state_delta: dict[str, str] | None = None
+    if authorization and authorization.strip():
+        state_delta = {AUTH_HEADER_STATE_KEY: authorization.strip()}
+
     try:
         reply: str | None = None
         async for event in runner.run_async(
             user_id=user_id,
             session_id=session_id,
             new_message=content,
+            state_delta=state_delta,
         ):
             maybe = _text_from_event(event)
             if maybe:

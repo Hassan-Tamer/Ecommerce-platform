@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Request, Response
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Header, Request, Response
 
 from app.auth.dependencies import get_current_user
 from app.db.models import User
@@ -17,6 +19,11 @@ async def post_assistant_message(
     response: Response,
     body: AssistantMessageIn,
     current_user: User = Depends(get_current_user),
+    authorization: Annotated[str | None, Header()] = None,
 ) -> AssistantMessageOut:
-    reply = await service.reply_for_user(current_user, body.message)
+    reply = await service.reply_for_user(
+        current_user,
+        body.message,
+        authorization=authorization,
+    )
     return AssistantMessageOut(reply=reply)
